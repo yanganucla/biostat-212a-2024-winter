@@ -62,10 +62,41 @@ $$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0))
 
 ## ISL Exercise 2.4.3 (10pts)
 
-```{r, eval = F}
-library(tidyverse)
-fit <- lm(sales ~ TV, data = )
+**Answer** 
+（a)
+```{r}
+chooseCRANmirror(ind=1)
+install.packages("ggplot2")
+library(ggplot2)
+flexibility <- c(1, 2, 3, 4, 5)
+bias <- c(4, 3.7, 2, 1, 0)
+variance <- c(0, 1, 2, 3, 4)
+training_error <- c(4.3, 3.2, 2, 3.2, 4.3)
+test_error <- c(4, 3.2, 2.8, 2.5, 2.2)
+bayes_error <- c(2, 2, 2, 2, 2)
+
+data <- data.frame(flexibility, bias, variance, training_error, test_error, bayes_error)
+
+
+plot <- ggplot(data, aes(x = flexibility)) +
+  geom_line(aes(y = bias, color = "Bias")) +
+  geom_line(aes(y = variance, color = "Variance")) +
+  geom_line(aes(y = training_error, color = "Training Error")) +
+  geom_line(aes(y = test_error, color = "Test Error")) +
+  geom_line(aes(y = bayes_error, color = "Bayes Error")) +
+  labs(x = "Flexibility", y = "Value") +
+  scale_color_manual(values = c("Bias" = "red", "Variance" = "blue", "Training Error" = "green", "Test Error" = "orange", "Bayes Error" = "purple")) +
+  theme_minimal()
+
+
+plot
 ```
+（b) 
+1. Bias: The bias curve typically decreases as the flexibility of the method increases. This is because more flexible methods can better fit the training data, reducing the bias.
+2. Variance: The variance curve typically increases as the flexibility of the method increases. This is because more flexible methods are more prone to overfitting, leading to higher variance.
+3. Training Error: The training error curve typically decreases as the flexibility of the method increases. This is because more flexible methods can better fit the training data, resulting in lower training error.
+4. Test Error: The test error curve typically forms a U-shape, with a minimum point at an intermediate level of flexibility. This is because less flexible methods have high bias but low variance, leading to underfitting and high test error. More flexible methods have low bias but high variance, leading to overfitting and high test error. The optimal level of flexibility balances the bias and variance, resulting in the lowest test error.
+5. Bayes Error: The Bayes (or irreducible) error curve is a horizontal line and represents the inherent error that cannot be reduced by any statistical learning method. It does not change with the flexibility of the method.
 
 ## ISL Exercise 2.4.4 (10pts)
 
