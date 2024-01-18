@@ -3144,7 +3144,12 @@ return!"\t\n\x0B\f\r                　\u2028\u2029
   </ul></li>
   <li><a href="#isl-exercise-2.4.3-10pts" id="toc-isl-exercise-2.4.3-10pts" class="nav-link" data-scroll-target="#isl-exercise-2.4.3-10pts"><span class="header-section-number">2</span> ISL Exercise 2.4.3 (10pts)</a></li>
   <li><a href="#isl-exercise-2.4.4-10pts" id="toc-isl-exercise-2.4.4-10pts" class="nav-link" data-scroll-target="#isl-exercise-2.4.4-10pts"><span class="header-section-number">3</span> ISL Exercise 2.4.4 (10pts)</a></li>
-  <li><a href="#isl-exercise-2.4.10-30pts" id="toc-isl-exercise-2.4.10-30pts" class="nav-link" data-scroll-target="#isl-exercise-2.4.10-30pts"><span class="header-section-number">4</span> ISL Exercise 2.4.10 (30pts)</a></li>
+  <li><a href="#isl-exercise-2.4.10-30pts" id="toc-isl-exercise-2.4.10-30pts" class="nav-link" data-scroll-target="#isl-exercise-2.4.10-30pts"><span class="header-section-number">4</span> ISL Exercise 2.4.10 (30pts)</a>
+  <ul>
+  <li><a href="#r" id="toc-r" class="nav-link" data-scroll-target="#r"><span class="header-section-number">4.0.1</span> R</a></li>
+  <li><a href="#r-1" id="toc-r-1" class="nav-link" data-scroll-target="#r-1"><span class="header-section-number">4.0.2</span> R</a></li>
+  <li><a href="#r-2" id="toc-r-2" class="nav-link" data-scroll-target="#r-2"><span class="header-section-number">4.0.3</span> R</a></li>
+  </ul></li>
   <li><a href="#isl-exercise-3.7.3-12pts" id="toc-isl-exercise-3.7.3-12pts" class="nav-link" data-scroll-target="#isl-exercise-3.7.3-12pts"><span class="header-section-number">5</span> ISL Exercise 3.7.3 (12pts)</a></li>
   <li><a href="#isl-exercise-3.7.15-20pts" id="toc-isl-exercise-3.7.15-20pts" class="nav-link" data-scroll-target="#isl-exercise-3.7.15-20pts"><span class="header-section-number">6</span> ISL Exercise 3.7.15 (20pts)</a></li>
   <li><a href="#bonus-question-20pts" id="toc-bonus-question-20pts" class="nav-link" data-scroll-target="#bonus-question-20pts"><span class="header-section-number">7</span> Bonus question (20pts)</a></li>
@@ -3239,14 +3244,13 @@ f_{\text{opt}}(X) = \operatorname{E}(Y | X)
 </section>
 <section id="isl-exercise-2.4.4-10pts" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="isl-exercise-2.4.4-10pts"><span class="header-section-number">3</span> ISL Exercise 2.4.4 (10pts)</h2>
+<p><strong>Answer</strong> (a) 1. Spam detection: The response is whether an email is spam or not. The predictors are the words in the email. The goal is prediction. 2. Credit card fraud detection: The response is whether a transaction is fraudulent or not. The predictors are the transaction amount, location, time, etc. The goal is prediction. 3. Medical diagnosis: The response is whether a patient has a certain disease or not. The predictors are the patient’s symptoms, test results, etc. The goal is inference. (b) 1. House price prediction: The response is the price of a house. The predictors are the house’s location, size, number of bedrooms, etc. The goal is prediction. 2. Stock price prediction: The response is the price of a stock. The predictors are the stock’s historical prices, trading volume, etc. The goal is prediction. 3. Weather forecasting: The response is the weather conditions. The predictors are the weather conditions in the past. The goal is prediction. (c) 1. Market segmentation: The goal is to divide customers into groups based on their purchasing behavior. 2. Social network analysis: The goal is to identify groups of people with similar interests. 3. Image segmentation: The goal is to identify objects in an image.</p>
 </section>
 <section id="isl-exercise-2.4.10-30pts" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="isl-exercise-2.4.10-30pts"><span class="header-section-number">4</span> ISL Exercise 2.4.10 (30pts)</h2>
-<p>Your can read in the <code>boston</code> data set directly from url <a href="https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv" class="uri">https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv</a>. A documentation of the <code>boston</code> data set is <a href="https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston">here</a>.</p>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href>R</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<section id="r" class="level4" data-number="4.0.1">
+<h4 data-number="4.0.1" class="anchored" data-anchor-id="r"><span class="header-section-number">4.0.1</span> R</h4>
+<p><strong>Answer</strong>（a) There are 506 rows and 13 columns in this data set. Each row represents a census tract in Boston, and each column represents a predictor (or response).</p>
 <div class="cell" data-layout-align="center" data-evalue="false">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -3281,9 +3285,57 @@ f_{\text{opt}}(X) = \operatorname{E}(Y | X)
 # ℹ 496 more rows</code></pre>
 </div>
 </div>
+</section>
+<section id="r-1" class="level4" data-number="4.0.2">
+<h4 data-number="4.0.2" class="anchored" data-anchor-id="r-1"><span class="header-section-number">4.0.2</span> R</h4>
+<p><strong>Answer</strong>（b) I explored some other scatterplots not shown below. In general there aren’t many easily interpretable relationships between variables in this data set. Some pairs have clusters of data, but no overall trend; others have floor effects where most communities have a value of zero (e.g., crime).</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ggscatter <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(boston, <span class="fu">aes</span>({{ x }}, {{ y }})) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatter</span>(chas, crim) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Crime occurs more often away from the Charles River&quot;</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">&quot;Or, most suburbs are away from the Charles River&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatter</span>(zn, nox) <span class="sc">+</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">paste0</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Higher nitrogen oxide concentration in suburbs with all residential </span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;land zoning below 25,000 sq.ft.&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatter</span>(ptratio, medv) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">paste0</span>(</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Higher pupil to teacher ratios are related to less </span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;valuable owner-occupied homes&quot;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="r-2" class="level4" data-number="4.0.3">
+<h4 data-number="4.0.3" class="anchored" data-anchor-id="r-2"><span class="header-section-number">4.0.3</span> R</h4>
+<p><strong>Answer</strong>(c) Yes, lower socioeconomic status and less valuable homes are associated with higher crime rates.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatter</span>(crim, lstat) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Higher crime rates are associated with lower socioeconomic status&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatter</span>(crim, medv) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Higher crime rates are associated with less valuable homes&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
+<ol start="4" type="a">
+<li>Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.</li>
+<li>How many of the census tracts in this data set bound the Charles river?</li>
+<li>What is the median pupil-teacher ratio among the towns in this data set?</li>
+<li>Which census tract of Boston has lowest median value of owner- occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.</li>
+<li>In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling. Your can read in the <code>boston</code> data set directly from url <a href="https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv" class="uri">https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv</a>. A documentation of the <code>boston</code> data set is <a href="https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston">here</a>.</li>
+</ol>
+</section>
 </section>
 <section id="isl-exercise-3.7.3-12pts" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="isl-exercise-3.7.3-12pts"><span class="header-section-number">5</span> ISL Exercise 3.7.3 (12pts)</h2>

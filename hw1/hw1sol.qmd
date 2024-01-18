@@ -61,7 +61,6 @@ $$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0))
 
 
 ## ISL Exercise 2.4.3 (10pts)
-
 **Answer** 
 （a)
 
@@ -103,16 +102,28 @@ legend('top', legend=c('Squared Bias', 'Variance', 'Training Error', 'Test Error
 5. Bayes Error: The Bayes (or irreducible) error curve is a horizontal line and represents the inherent error that cannot be reduced by any statistical learning method. It does not change with the flexibility of the method.
 
 ## ISL Exercise 2.4.4 (10pts)
+**Answer**
+(a) 
+1. Spam detection: The response is whether an email is spam or not. The predictors are the words in the email. The goal is prediction.
+2. Credit card fraud detection: The response is whether a transaction is fraudulent or not. The predictors are the transaction amount, location, time, etc. The goal is prediction.
+3. Medical diagnosis: The response is whether a patient has a certain disease or not. The predictors are the patient’s symptoms, test results, etc. The goal is inference.
+(b)
+1. House price prediction: The response is the price of a house. The predictors are the house’s location, size, number of bedrooms, etc. The goal is prediction.
+2. Stock price prediction: The response is the price of a stock. The predictors are the stock’s historical prices, trading volume, etc. The goal is prediction.
+3. Weather forecasting: The response is the weather conditions. The predictors are the weather conditions in the past. The goal is prediction.
+(c)
+1. Market segmentation: The goal is to divide customers into groups based on their purchasing behavior.
+2. Social network analysis: The goal is to identify groups of people with similar interests.
+3. Image segmentation: The goal is to identify objects in an image.
 
 
 
 ## ISL Exercise 2.4.10 (30pts)
 
-Your can read in the `boston` data set directly from url <https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv>. A documentation of the `boston` data set is [here](https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston).
-
-::: {.panel-tabset}
-
 #### R
+
+**Answer**（a)
+There are 506 rows and 13 columns in this data set. Each row represents a census tract in Boston, and each column represents a predictor (or response).
 
 ```{r, evalue = F}
 library(tidyverse)
@@ -121,9 +132,62 @@ Boston <- read_csv("https://raw.githubusercontent.com/ucla-biostat-212a/2024wint
   print(width = Inf)
 ```
 
+#### R
+**Answer**（b)
+I explored some other scatterplots not shown below. In general there aren’t many easily interpretable relationships between variables in this data set. Some pairs have clusters of data, but no overall trend; others have floor effects where most communities have a value of zero (e.g., crime).
+
+```{r, eval = F}
+ggscatter <- function(x, y) {
+  ggplot(boston, aes({{ x }}, {{ y }})) +
+    geom_point()
+}
+
+ggscatter(chas, crim) +
+  labs(
+    title = "Crime occurs more often away from the Charles River",
+    subtitle = "Or, most suburbs are away from the Charles River"
+  )
+ggscatter(zn, nox) +
+  labs(
+    title = paste0(
+      "Higher nitrogen oxide concentration in suburbs with all residential \n",
+      "land zoning below 25,000 sq.ft.")
+  )
+ggscatter(ptratio, medv) +
+  labs(
+    title = paste0(
+      "Higher pupil to teacher ratios are related to less \n",
+      "valuable owner-occupied homes"
+    )
+  )
 
 
-:::
+``` 
+
+#### R
+**Answer**(c)
+Yes, lower socioeconomic status and less valuable homes are associated with higher crime rates.
+```{r, eval = F}
+ggscatter(crim, lstat) +
+  labs(
+    title = "Higher crime rates are associated with lower socioeconomic status"
+  )
+ggscatter(crim, medv) +
+  labs(
+    title = "Higher crime rates are associated with less valuable homes"
+  )
+
+```
+
+
+(d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
+(e) How many of the census tracts in this data set bound the Charles river?
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+(g) Which census tract of Boston has lowest median value of owner- occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
+(h) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling.
+Your can read in the `boston` data set directly from url <https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv>. A documentation of the `boston` data set is [here](https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston).
+
+
 
 ## ISL Exercise 3.7.3 (12pts)
 
