@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yang An, UID: 106332601">
-<meta name="dcterms.date" content="2024-01-16">
+<meta name="dcterms.date" content="2024-01-17">
 
 <title>Biostat 212a Homework 1</title>
 <style>
@@ -3175,7 +3175,7 @@ return!"\t\n\x0B\f\r                　\u2028\u2029
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 16, 2024</p>
+      <p class="date">January 17, 2024</p>
     </div>
   </div>
   
@@ -3196,7 +3196,7 @@ Y = f(X) + \epsilon,
 f_{\text{opt}}(X) = \operatorname{E}(Y | X)
 \]</span> minimizes the mean squared prediction error <span class="math display">\[
 \operatorname{E}\{[Y - f(X)]^2\},
-\]</span> where the expectations averages over variations in both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. (Hint: condition on <span class="math inline">\(X\)</span>.)</p>
+\]</span> where the expectations averages over variations in both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. (Hint: condition on <span class="math inline">\(X\)</span>.) <strong>Answer</strong> <span class="math display">\[ \begin{aligned} \operatorname{E}\{[Y - f(X)]^2\} &amp;= \operatorname{E}\{[Y - \operatorname{E}(Y | X) + \operatorname{E}(Y | X) - f(X)]^2\} \\ &amp;= \operatorname{E}\{[Y - \operatorname{E}(Y | X)]^2\} + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \\ &amp;= \operatorname{Var}(Y | X) + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \end{aligned} \]</span> Since<span class="math inline">\(\operatorname{Var}(Y | X) \geq 0\)</span>, the minimum is achieved when <span class="math inline">\(\operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} = 0\)</span>, which is equivalent to <span class="math inline">\(f(X) = \operatorname{E}(Y | X)\)</span>.</p>
 </section>
 <section id="bias-variance-trade-off" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="bias-variance-trade-off"><span class="header-section-number">1.2</span> Bias-variance trade-off</h3>

@@ -41,8 +41,9 @@ $$
 \operatorname{E}\{[Y - f(X)]^2\},
 $$
 where the expectations averages over variations in both $X$ and $Y$. (Hint: condition on $X$.)
-
-
+**Answer** 
+$$ \begin{aligned} \operatorname{E}\{[Y - f(X)]^2\} &= \operatorname{E}\{[Y - \operatorname{E}(Y | X) + \operatorname{E}(Y | X) - f(X)]^2\} \\ &= \operatorname{E}\{[Y - \operatorname{E}(Y | X)]^2\} + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \\ &= \operatorname{Var}(Y | X) + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \end{aligned} $$
+Since$\operatorname{Var}(Y | X) \geq 0$, the minimum is achieved when $\operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} = 0$, which is equivalent to $f(X) = \operatorname{E}(Y | X)$. 
 
 
 ### Bias-variance trade-off
