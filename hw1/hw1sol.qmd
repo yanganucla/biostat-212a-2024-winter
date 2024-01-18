@@ -53,6 +53,12 @@ $$
 \operatorname{E}\{[y_0 - \hat f(x_0)]^2\} = \underbrace{\operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2}_{\text{MSE of } \hat f(x_0) \text{ for estimating } f(x_0)} + \underbrace{\operatorname{Var}(\epsilon)}_{\text{irreducible}},
 $$
 where the expectation averages over the variability in $y_0$ and $\hat f$.
+**Answer** 
+$$ \begin{aligned} \operatorname{E}\{[y_0 - \hat f(x_0)]^2\} &= \operatorname{E}\{[y_0 - f(x_0) + f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{E}\{[y_0 - f(x_0)]^2\} + \operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{Var}(y_0) + \operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{Var}(y_0) + \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2 \end{aligned} $$
+where the last equality is due to the fact that
+$$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2$$. 
+
+
 
 ## ISL Exercise 2.4.3 (10pts)
 
