@@ -64,33 +64,37 @@ $$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0))
 
 **Answer** 
 （a)
-```{r}
-chooseCRANmirror(ind=1)
-install.packages("ggplot2")
-library(ggplot2)
-flexibility <- c(1, 2, 3, 4, 5)
-bias <- c(4, 3.7, 2, 1, 0)
-variance <- c(0, 1, 2, 3, 4)
-training_error <- c(4.3, 3.2, 2, 3.2, 4.3)
-test_error <- c(4, 3.2, 2.8, 2.5, 2.2)
-bayes_error <- c(2, 2, 2, 2, 2)
 
-data <- data.frame(flexibility, bias, variance, training_error, test_error, bayes_error)
+```{r, eval = F}
+library(tidyverse)
+x <- seq(0.0, 10.0, 0.02)
 
+squared_bias <- function(x) {
+  return(0.002*(-x+10)^3)
+}
+variance <- function(x) {
+  return(0.002*x^3)
+}
+training_error <- function(x) {
+  return(2.38936 - 0.825077*x + 0.176655*x^2 - 0.0182319*x^3 + 0.00067091*x^4)
+}
+test_error <- function(x) {
+  return(3 - 0.6*x + 0.06*x^2)
+}
+bayes_error <- function(x) {
+  return(x + 1 - x)
+}
 
-plot <- ggplot(data, aes(x = flexibility)) +
-  geom_line(aes(y = bias, color = "Bias")) +
-  geom_line(aes(y = variance, color = "Variance")) +
-  geom_line(aes(y = training_error, color = "Training Error")) +
-  geom_line(aes(y = test_error, color = "Test Error")) +
-  geom_line(aes(y = bayes_error, color = "Bayes Error")) +
-  labs(x = "Flexibility", y = "Value") +
-  scale_color_manual(values = c("Bias" = "red", "Variance" = "blue", "Training Error" = "green", "Test Error" = "orange", "Bayes Error" = "purple")) +
-  theme_minimal()
+plot(x, squared_bias(x), type='l', col='red', xlab='the amount of flexibility', ylab='values', ylim=c(0, 4), main='Bias-Variance Tradeoff')
+lines(x, variance(x), col='blue')
+lines(x, training_error(x), col='green')
+lines(x, test_error(x), col='orange')
+lines(x, bayes_error(x), col='purple')
+legend('top', legend=c('Squared Bias', 'Variance', 'Training Error', 'Test Error', 'Bayes Error'), col=c('red', 'blue', 'green', 'orange', 'purple'), lty=1, cex=0.5)
 
-
-plot
 ```
+
+
 （b) 
 1. Bias: The bias curve typically decreases as the flexibility of the method increases. This is because more flexible methods can better fit the training data, reducing the bias.
 2. Variance: The variance curve typically increases as the flexibility of the method increases. This is because more flexible methods are more prone to overfitting, leading to higher variance.
