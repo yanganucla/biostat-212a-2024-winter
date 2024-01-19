@@ -179,13 +179,92 @@ ggscatter(crim, medv) +
 
 ```
 
+#### R
+**Answer**
+Yes, some census tracts have particularly high crime rates, tax rates, and pupil-teacher ratios. The range of each predictor is shown below.
+```{r, eval = F}
+# draw histograms
+attach(new_df)
+par(mfrow=c(1,3))
+hist(crim, breaks=10, col="2")
+hist(tax, breaks=10, col="3")
+hist(ptratio, breaks=10, col="4")
+# Select only the variables
+new_df <- select(Boston, crim, tax, ptratio)
+# Calculate the range for each numerical column
+range_num_vars <- lapply(new_df, range)
+# Print the range for each numerical column
+range_num_vars
+```
 
-(d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
-(e) How many of the census tracts in this data set bound the Charles river?
-(f) What is the median pupil-teacher ratio among the towns in this data set?
-(g) Which census tract of Boston has lowest median value of owner- occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
-(h) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling.
-Your can read in the `boston` data set directly from url <https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv>. A documentation of the `boston` data set is [here](https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston).
+
+#### R
+**Answer**(e)
+There are 35 census tracts that bound the Charles River.
+```{r, eval = F}
+boston %>% 
+  mutate(bound = if_else(chas == 1, "Yes", "No")) %>% 
+  group_by(bound) %>% 
+  summarise(
+    n = n()
+  )
+```
+
+
+#### R
+**Answer**(f)
+The median pupil-teacher ratio is 19.05.
+```{r, eval = F}
+boston %>% 
+  summarise(
+    median_ptratio = median(ptratio)
+  )
+```
+
+#### R
+**Answer**（g)
+The census tract with the lowest median value of owner-occupied homes is 399. The values of the other predictors for that census tract are shown below. 
+crim: above 3rd quartile
+zn: at min
+indus: at 3rd quartile
+chas: not bounded by river
+nox: bove 3rd quartile
+rm: below 1st quartile
+age: at max
+dis: below 1st quartile
+rad: at max
+tax: at 3rd quartile
+ptratio: at 3rd quartile
+black: 399 at max; 406 above 1st quartile
+lstat: above 3rd quartile
+medv: at min
+```{r}
+# the below will display the first record
+lowest_record <- Boston[which.min(Boston$medv),]
+print(lowest_record)
+# to display all the recods with the minimum value
+t(subset(Boston, medv == min(medv)))
+summary(Boston)
+```
+
+
+#### R
+**Answer**(h)
+There are 64 census tracts that average more than seven rooms per dwelling, and 13 census tracts that average more than eight rooms per dwelling. The census tracts that average more than eight rooms per dwelling have a median value of owner-occupied homes that is higher than the overall median value of owner-occupied homes. 
+```{r, eval = F}
+boston %>% 
+  mutate(
+    more_than_7_rooms = if_else(rm > 7, "Yes", "No"),
+    more_than_8_rooms = if_else(rm > 8, "Yes", "No")
+  ) %>% 
+  group_by(more_than_7_rooms, more_than_8_rooms) %>% 
+  summarise(
+    n = n(),
+    median_medv = median(medv),
+    median_crim = median(crim)
+  )
+
+```
 
 
 

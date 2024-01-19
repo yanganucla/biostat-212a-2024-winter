@@ -3149,6 +3149,11 @@ return!"\t\n\x0B\f\r                　\u2028\u2029
   <li><a href="#r" id="toc-r" class="nav-link" data-scroll-target="#r"><span class="header-section-number">4.0.1</span> R</a></li>
   <li><a href="#r-1" id="toc-r-1" class="nav-link" data-scroll-target="#r-1"><span class="header-section-number">4.0.2</span> R</a></li>
   <li><a href="#r-2" id="toc-r-2" class="nav-link" data-scroll-target="#r-2"><span class="header-section-number">4.0.3</span> R</a></li>
+  <li><a href="#r-3" id="toc-r-3" class="nav-link" data-scroll-target="#r-3"><span class="header-section-number">4.0.4</span> R</a></li>
+  <li><a href="#r-4" id="toc-r-4" class="nav-link" data-scroll-target="#r-4"><span class="header-section-number">4.0.5</span> R</a></li>
+  <li><a href="#r-5" id="toc-r-5" class="nav-link" data-scroll-target="#r-5"><span class="header-section-number">4.0.6</span> R</a></li>
+  <li><a href="#r-6" id="toc-r-6" class="nav-link" data-scroll-target="#r-6"><span class="header-section-number">4.0.7</span> R</a></li>
+  <li><a href="#r-7" id="toc-r-7" class="nav-link" data-scroll-target="#r-7"><span class="header-section-number">4.0.8</span> R</a></li>
   </ul></li>
   <li><a href="#isl-exercise-3.7.3-12pts" id="toc-isl-exercise-3.7.3-12pts" class="nav-link" data-scroll-target="#isl-exercise-3.7.3-12pts"><span class="header-section-number">5</span> ISL Exercise 3.7.3 (12pts)</a></li>
   <li><a href="#isl-exercise-3.7.15-20pts" id="toc-isl-exercise-3.7.15-20pts" class="nav-link" data-scroll-target="#isl-exercise-3.7.15-20pts"><span class="header-section-number">6</span> ISL Exercise 3.7.15 (20pts)</a></li>
@@ -3328,13 +3333,128 @@ f_{\text{opt}}(X) = \operatorname{E}(Y | X)
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Higher crime rates are associated with less valuable homes&quot;</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ol start="4" type="a">
-<li>Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.</li>
-<li>How many of the census tracts in this data set bound the Charles river?</li>
-<li>What is the median pupil-teacher ratio among the towns in this data set?</li>
-<li>Which census tract of Boston has lowest median value of owner- occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.</li>
-<li>In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling. Your can read in the <code>boston</code> data set directly from url <a href="https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv" class="uri">https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/Boston.csv</a>. A documentation of the <code>boston</code> data set is <a href="https://www.rdocumentation.org/packages/ISLR2/versions/1.3-2/topics/Boston">here</a>.</li>
-</ol>
+</section>
+<section id="r-3" class="level4" data-number="4.0.4">
+<h4 data-number="4.0.4" class="anchored" data-anchor-id="r-3"><span class="header-section-number">4.0.4</span> R</h4>
+<p><strong>Answer</strong> Yes, some census tracts have particularly high crime rates, tax rates, and pupil-teacher ratios. The range of each predictor is shown below.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># draw histograms</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(new_df)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(crim, <span class="at">breaks=</span><span class="dv">10</span>, <span class="at">col=</span><span class="st">&quot;2&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(tax, <span class="at">breaks=</span><span class="dv">10</span>, <span class="at">col=</span><span class="st">&quot;3&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(ptratio, <span class="at">breaks=</span><span class="dv">10</span>, <span class="at">col=</span><span class="st">&quot;4&quot;</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Select only the variables</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>new_df <span class="ot">&lt;-</span> <span class="fu">select</span>(Boston, crim, tax, ptratio)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the range for each numerical column</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>range_num_vars <span class="ot">&lt;-</span> <span class="fu">lapply</span>(new_df, range)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the range for each numerical column</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>range_num_vars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="r-4" class="level4" data-number="4.0.5">
+<h4 data-number="4.0.5" class="anchored" data-anchor-id="r-4"><span class="header-section-number">4.0.5</span> R</h4>
+<p><strong>Answer</strong>(e) There are 35 census tracts that bound the Charles River.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>boston <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">bound =</span> <span class="fu">if_else</span>(chas <span class="sc">==</span> <span class="dv">1</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(bound) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="r-5" class="level4" data-number="4.0.6">
+<h4 data-number="4.0.6" class="anchored" data-anchor-id="r-5"><span class="header-section-number">4.0.6</span> R</h4>
+<p><strong>Answer</strong>(f) The median pupil-teacher ratio is 19.05.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>boston <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_ptratio =</span> <span class="fu">median</span>(ptratio)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="r-6" class="level4" data-number="4.0.7">
+<h4 data-number="4.0.7" class="anchored" data-anchor-id="r-6"><span class="header-section-number">4.0.7</span> R</h4>
+<p><strong>Answer</strong>（g) The census tract with the lowest median value of owner-occupied homes is 399. The values of the other predictors for that census tract are shown below. crim: above 3rd quartile zn: at min indus: at 3rd quartile chas: not bounded by river nox: bove 3rd quartile rm: below 1st quartile age: at max dis: below 1st quartile rad: at max tax: at 3rd quartile ptratio: at 3rd quartile black: 399 at max; 406 above 1st quartile lstat: above 3rd quartile medv: at min</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the below will display the first record</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>lowest_record <span class="ot">&lt;-</span> Boston[<span class="fu">which.min</span>(Boston<span class="sc">$</span>medv),]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(lowest_record)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 13
+   crim    zn indus  chas   nox    rm   age   dis   rad   tax ptratio lstat
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1  38.4     0  18.1     0 0.693  5.45   100  1.49    24   666    20.2  30.6
+# ℹ 1 more variable: medv &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to display all the recods with the minimum value</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(<span class="fu">subset</span>(Boston, medv <span class="sc">==</span> <span class="fu">min</span>(medv)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            [,1]     [,2]
+crim     38.3518  67.9208
+zn        0.0000   0.0000
+indus    18.1000  18.1000
+chas      0.0000   0.0000
+nox       0.6930   0.6930
+rm        5.4530   5.6830
+age     100.0000 100.0000
+dis       1.4896   1.4254
+rad      24.0000  24.0000
+tax     666.0000 666.0000
+ptratio  20.2000  20.2000
+lstat    30.5900  22.9800
+medv      5.0000   5.0000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Boston)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      crim                zn             indus            chas        
+ Min.   : 0.00632   Min.   :  0.00   Min.   : 0.46   Min.   :0.00000  
+ 1st Qu.: 0.08205   1st Qu.:  0.00   1st Qu.: 5.19   1st Qu.:0.00000  
+ Median : 0.25651   Median :  0.00   Median : 9.69   Median :0.00000  
+ Mean   : 3.61352   Mean   : 11.36   Mean   :11.14   Mean   :0.06917  
+ 3rd Qu.: 3.67708   3rd Qu.: 12.50   3rd Qu.:18.10   3rd Qu.:0.00000  
+ Max.   :88.97620   Max.   :100.00   Max.   :27.74   Max.   :1.00000  
+      nox               rm             age              dis        
+ Min.   :0.3850   Min.   :3.561   Min.   :  2.90   Min.   : 1.130  
+ 1st Qu.:0.4490   1st Qu.:5.886   1st Qu.: 45.02   1st Qu.: 2.100  
+ Median :0.5380   Median :6.208   Median : 77.50   Median : 3.207  
+ Mean   :0.5547   Mean   :6.285   Mean   : 68.57   Mean   : 3.795  
+ 3rd Qu.:0.6240   3rd Qu.:6.623   3rd Qu.: 94.08   3rd Qu.: 5.188  
+ Max.   :0.8710   Max.   :8.780   Max.   :100.00   Max.   :12.127  
+      rad              tax           ptratio          lstat      
+ Min.   : 1.000   Min.   :187.0   Min.   :12.60   Min.   : 1.73  
+ 1st Qu.: 4.000   1st Qu.:279.0   1st Qu.:17.40   1st Qu.: 6.95  
+ Median : 5.000   Median :330.0   Median :19.05   Median :11.36  
+ Mean   : 9.549   Mean   :408.2   Mean   :18.46   Mean   :12.65  
+ 3rd Qu.:24.000   3rd Qu.:666.0   3rd Qu.:20.20   3rd Qu.:16.95  
+ Max.   :24.000   Max.   :711.0   Max.   :22.00   Max.   :37.97  
+      medv      
+ Min.   : 5.00  
+ 1st Qu.:17.02  
+ Median :21.20  
+ Mean   :22.53  
+ 3rd Qu.:25.00  
+ Max.   :50.00  </code></pre>
+</div>
+</div>
+</section>
+<section id="r-7" class="level4" data-number="4.0.8">
+<h4 data-number="4.0.8" class="anchored" data-anchor-id="r-7"><span class="header-section-number">4.0.8</span> R</h4>
+<p><strong>Answer</strong>(h) There are 64 census tracts that average more than seven rooms per dwelling, and 13 census tracts that average more than eight rooms per dwelling. The census tracts that average more than eight rooms per dwelling have a median value of owner-occupied homes that is higher than the overall median value of owner-occupied homes.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>boston <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">more_than_7_rooms =</span> <span class="fu">if_else</span>(rm <span class="sc">&gt;</span> <span class="dv">7</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">more_than_8_rooms =</span> <span class="fu">if_else</span>(rm <span class="sc">&gt;</span> <span class="dv">8</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(more_than_7_rooms, more_than_8_rooms) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_medv =</span> <span class="fu">median</span>(medv),</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_crim =</span> <span class="fu">median</span>(crim)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 </section>
 <section id="isl-exercise-3.7.3-12pts" class="level2" data-number="5">
