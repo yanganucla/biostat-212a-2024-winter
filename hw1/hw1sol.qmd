@@ -269,6 +269,21 @@ boston %>%
 
 
 ## ISL Exercise 3.7.3 (12pts)
+**Answer** 
+(a) 
+iii is true.
+i:the equation to Salary = 50 + 20 * GPA + 0.07 * IQ + 35 * College + 0.01 * GPA * IQ - 10 * GPA * College
+We now can estimate that High School graduates earn an average of 50 + 20 * mean(GPA) + 0.07 * mean(IQ) + 0.01 * mean(GPA) * mean(IQ) and College graduates earn an average of 50 + 20 * mean(GPA) + 0.07 * mean(IQ) + 35 + 0.01 * mean(GPA) * mean(IQ) - 10 * mean(GPA). When you subtract out the common terms, you find out that College graduates earn an average of 35 - 10 * mean(GPA) more than High School graduates. Since we don't know the value of mean(GPA), we don't know whether High School graduates are outearning College graduates on average or not.
+ii:Again, this is indeterminate.
+iii:Since College are earning an average of 35 - 10 * mean(GPA) more than men, a higher GPA mean means that College earn less than high school graduates, so this is true.
+iv:Since college are earning an average of 35 - 10 * mean(GPA) more than high school graduates, a higher GPA mean means that college earn less than high school graduates, so this is false.
+
+**Answer** 
+(b) 137.1 (50 + 20*4 + 0.07*110 + 35 + 0.01*4*110 - 10*4)
+
+**Answer** 
+(c) This is false, because the statistical significance of an interaction is different from the magnitude of the interaction. It's possible to have a lot of evidence for a small effect. Also, a small coefficient doesn't even mean the interaction effect is small, since it is very sensitive to the units of the two variables.
+
 
 ## ISL Exercise 3.7.15 (20pts)
 
