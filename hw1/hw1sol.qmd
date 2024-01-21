@@ -20,49 +20,44 @@ knitr:
     # fig.height: 4
     message: FALSE
     cache: false
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
 ## Filling gaps in lecture notes (10pts)
 
-Consider the regression model
-$$
+Consider the regression model $$
 Y = f(X) + \epsilon,
-$$
-where $\operatorname{E}(\epsilon) = 0$. 
+$$ where $\operatorname{E}(\epsilon) = 0$.
 
 ### Optimal regression function
 
-Show that the choice
-$$
+Show that the choice $$
 f_{\text{opt}}(X) = \operatorname{E}(Y | X)
-$$
-minimizes the mean squared prediction error
-$$
+$$ minimizes the mean squared prediction error $$
 \operatorname{E}\{[Y - f(X)]^2\},
-$$
-where the expectations averages over variations in both $X$ and $Y$. (Hint: condition on $X$.)
-**Answer** 
+$$ where the expectations averages over variations in both $X$ and $Y$.
+(Hint: condition on $X$.) **Answer**
 $$ \begin{aligned} \operatorname{E}\{[Y - f(X)]^2\} &= \operatorname{E}\{[Y - \operatorname{E}(Y | X) + \operatorname{E}(Y | X) - f(X)]^2\} \\ &= \operatorname{E}\{[Y - \operatorname{E}(Y | X)]^2\} + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \\ &= \operatorname{Var}(Y | X) + \operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} \end{aligned} $$
-Since$\operatorname{Var}(Y | X) \geq 0$, the minimum is achieved when $\operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} = 0$, which is equivalent to $f(X) = \operatorname{E}(Y | X)$. 
-
+Since$\operatorname{Var}(Y | X) \geq 0$, the minimum is achieved when
+$\operatorname{E}\{[\operatorname{E}(Y | X) - f(X)]^2\} = 0$, which is
+equivalent to $f(X) = \operatorname{E}(Y | X)$.
 
 ### Bias-variance trade-off
 
-Given an estimate $\hat f$ of $f$, show that the test error at a $x_0$ can be decomposed as
-$$
+Given an estimate $\hat f$ of $f$, show that the test error at a $x_0$
+can be decomposed as $$
 \operatorname{E}\{[y_0 - \hat f(x_0)]^2\} = \underbrace{\operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2}_{\text{MSE of } \hat f(x_0) \text{ for estimating } f(x_0)} + \underbrace{\operatorname{Var}(\epsilon)}_{\text{irreducible}},
-$$
-where the expectation averages over the variability in $y_0$ and $\hat f$.
-**Answer** 
+$$ where the expectation averages over the variability in $y_0$ and
+$\hat f$. **Answer**
 $$ \begin{aligned} \operatorname{E}\{[y_0 - \hat f(x_0)]^2\} &= \operatorname{E}\{[y_0 - f(x_0) + f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{E}\{[y_0 - f(x_0)]^2\} + \operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{Var}(y_0) + \operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} \\ &= \operatorname{Var}(y_0) + \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2 \end{aligned} $$
 where the last equality is due to the fact that
-$$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2$$. 
-
-
+$$\operatorname{E}\{[f(x_0) - \hat f(x_0)]^2\} = \operatorname{Var}(\hat f(x_0)) + [\operatorname{Bias}(\hat f(x_0))]^2$$.
 
 ## ISL Exercise 2.4.3 (10pts)
-**Answer** 
-（a)
+
+**Answer** （a)
 
 ```{r, eval = F}
 library(tidyverse)
@@ -93,37 +88,54 @@ legend('top', legend=c('Squared Bias', 'Variance', 'Training Error', 'Test Error
 
 ```
 
-
-（b) 
-1. Bias: The bias curve typically decreases as the flexibility of the method increases. This is because more flexible methods can better fit the training data, reducing the bias.
-2. Variance: The variance curve typically increases as the flexibility of the method increases. This is because more flexible methods are more prone to overfitting, leading to higher variance.
-3. Training Error: The training error curve typically decreases as the flexibility of the method increases. This is because more flexible methods can better fit the training data, resulting in lower training error.
-4. Test Error: The test error curve typically forms a U-shape, with a minimum point at an intermediate level of flexibility. This is because less flexible methods have high bias but low variance, leading to underfitting and high test error. More flexible methods have low bias but high variance, leading to overfitting and high test error. The optimal level of flexibility balances the bias and variance, resulting in the lowest test error.
-5. Bayes Error: The Bayes (or irreducible) error curve is a horizontal line and represents the inherent error that cannot be reduced by any statistical learning method. It does not change with the flexibility of the method.
+（b) 1. Bias: The bias curve typically decreases as the flexibility of
+the method increases. This is because more flexible methods can better
+fit the training data, reducing the bias. 2. Variance: The variance
+curve typically increases as the flexibility of the method increases.
+This is because more flexible methods are more prone to overfitting,
+leading to higher variance. 3. Training Error: The training error curve
+typically decreases as the flexibility of the method increases. This is
+because more flexible methods can better fit the training data,
+resulting in lower training error. 4. Test Error: The test error curve
+typically forms a U-shape, with a minimum point at an intermediate level
+of flexibility. This is because less flexible methods have high bias but
+low variance, leading to underfitting and high test error. More flexible
+methods have low bias but high variance, leading to overfitting and high
+test error. The optimal level of flexibility balances the bias and
+variance, resulting in the lowest test error. 5. Bayes Error: The Bayes
+(or irreducible) error curve is a horizontal line and represents the
+inherent error that cannot be reduced by any statistical learning
+method. It does not change with the flexibility of the method.
 
 ## ISL Exercise 2.4.4 (10pts)
-**Answer**
-(a) 
-1. Spam detection: The response is whether an email is spam or not. The predictors are the words in the email. The goal is prediction.
-2. Credit card fraud detection: The response is whether a transaction is fraudulent or not. The predictors are the transaction amount, location, time, etc. The goal is prediction.
-3. Medical diagnosis: The response is whether a patient has a certain disease or not. The predictors are the patient’s symptoms, test results, etc. The goal is inference.
-(b)
-1. House price prediction: The response is the price of a house. The predictors are the house’s location, size, number of bedrooms, etc. The goal is prediction.
-2. Stock price prediction: The response is the price of a stock. The predictors are the stock’s historical prices, trading volume, etc. The goal is prediction.
-3. Weather forecasting: The response is the weather conditions. The predictors are the weather conditions in the past. The goal is prediction.
-(c)
-1. Market segmentation: The goal is to divide customers into groups based on their purchasing behavior.
-2. Social network analysis: The goal is to identify groups of people with similar interests.
-3. Image segmentation: The goal is to identify objects in an image.
 
-
+**Answer** (a) 1. Spam detection: The response is whether an email is
+spam or not. The predictors are the words in the email. The goal is
+prediction. 2. Credit card fraud detection: The response is whether a
+transaction is fraudulent or not. The predictors are the transaction
+amount, location, time, etc. The goal is prediction. 3. Medical
+diagnosis: The response is whether a patient has a certain disease or
+not. The predictors are the patient's symptoms, test results, etc. The
+goal is inference. (b) 1. House price prediction: The response is the
+price of a house. The predictors are the house's location, size, number
+of bedrooms, etc. The goal is prediction. 2. Stock price prediction: The
+response is the price of a stock. The predictors are the stock's
+historical prices, trading volume, etc. The goal is prediction. 3.
+Weather forecasting: The response is the weather conditions. The
+predictors are the weather conditions in the past. The goal is
+prediction. (c) 1. Market segmentation: The goal is to divide customers
+into groups based on their purchasing behavior. 2. Social network
+analysis: The goal is to identify groups of people with similar
+interests. 3. Image segmentation: The goal is to identify objects in an
+image.
 
 ## ISL Exercise 2.4.10 (30pts)
 
 #### R
 
-**Answer**（a)
-There are 506 rows and 13 columns in this data set. Each row represents a census tract in Boston, and each column represents a predictor (or response).
+**Answer**（a) There are 506 rows and 13 columns in this data set. Each
+row represents a census tract in Boston, and each column represents a
+predictor (or response).
 
 ```{r, evalue = F}
 library(tidyverse)
@@ -133,8 +145,12 @@ Boston <- read_csv("https://raw.githubusercontent.com/ucla-biostat-212a/2024wint
 ```
 
 #### R
-**Answer**（b)
-I explored some other scatterplots not shown below. In general there aren’t many easily interpretable relationships between variables in this data set. Some pairs have clusters of data, but no overall trend; others have floor effects where most communities have a value of zero (e.g., crime).
+
+**Answer**（b) I explored some other scatterplots not shown below. In
+general there aren't many easily interpretable relationships between
+variables in this data set. Some pairs have clusters of data, but no
+overall trend; others have floor effects where most communities have a
+value of zero (e.g., crime).
 
 ```{r, eval = F}
 ggscatter <- function(x, y) {
@@ -162,11 +178,13 @@ ggscatter(ptratio, medv) +
   )
 
 
-``` 
+```
 
 #### R
-**Answer**(c)
-Yes, lower socioeconomic status and less valuable homes are associated with higher crime rates.
+
+**Answer**(c) Yes, lower socioeconomic status and less valuable homes
+are associated with higher crime rates.
+
 ```{r, eval = F}
 ggscatter(crim, lstat) +
   labs(
@@ -180,8 +198,11 @@ ggscatter(crim, medv) +
 ```
 
 #### R
-**Answer**
-Yes, some census tracts have particularly high crime rates, tax rates, and pupil-teacher ratios. The range of each predictor is shown below.
+
+**Answer** Yes, some census tracts have particularly high crime rates,
+tax rates, and pupil-teacher ratios. The range of each predictor is
+shown below.
+
 ```{r, eval = F}
 # draw histograms
 attach(new_df)
@@ -197,10 +218,10 @@ range_num_vars <- lapply(new_df, range)
 range_num_vars
 ```
 
-
 #### R
-**Answer**(e)
-There are 35 census tracts that bound the Charles River.
+
+**Answer**(e) There are 35 census tracts that bound the Charles River.
+
 ```{r, eval = F}
 boston %>% 
   mutate(bound = if_else(chas == 1, "Yes", "No")) %>% 
@@ -210,10 +231,10 @@ boston %>%
   )
 ```
 
-
 #### R
-**Answer**(f)
-The median pupil-teacher ratio is 19.05.
+
+**Answer**(f) The median pupil-teacher ratio is 19.05.
+
 ```{r, eval = F}
 boston %>% 
   summarise(
@@ -222,22 +243,15 @@ boston %>%
 ```
 
 #### R
-**Answer**（g)
-The census tract with the lowest median value of owner-occupied homes is 399. The values of the other predictors for that census tract are shown below. 
-crim: above 3rd quartile
-zn: at min
-indus: at 3rd quartile
-chas: not bounded by river
-nox: bove 3rd quartile
-rm: below 1st quartile
-age: at max
-dis: below 1st quartile
-rad: at max
-tax: at 3rd quartile
-ptratio: at 3rd quartile
-black: 399 at max; 406 above 1st quartile
-lstat: above 3rd quartile
-medv: at min
+
+**Answer**（g) The census tract with the lowest median value of
+owner-occupied homes is 399. The values of the other predictors for that
+census tract are shown below. crim: above 3rd quartile zn: at min indus:
+at 3rd quartile chas: not bounded by river nox: bove 3rd quartile rm:
+below 1st quartile age: at max dis: below 1st quartile rad: at max tax:
+at 3rd quartile ptratio: at 3rd quartile black: 399 at max; 406 above
+1st quartile lstat: above 3rd quartile medv: at min
+
 ```{r}
 # the below will display the first record
 lowest_record <- Boston[which.min(Boston$medv),]
@@ -247,10 +261,14 @@ t(subset(Boston, medv == min(medv)))
 summary(Boston)
 ```
 
-
 #### R
-**Answer**(h)
-There are 64 census tracts that average more than seven rooms per dwelling, and 13 census tracts that average more than eight rooms per dwelling. The census tracts that average more than eight rooms per dwelling have a median value of owner-occupied homes that is higher than the overall median value of owner-occupied homes. 
+
+**Answer**(h) There are 64 census tracts that average more than seven
+rooms per dwelling, and 13 census tracts that average more than eight
+rooms per dwelling. The census tracts that average more than eight rooms
+per dwelling have a median value of owner-occupied homes that is higher
+than the overall median value of owner-occupied homes.
+
 ```{r, eval = F}
 boston %>% 
   mutate(
@@ -266,31 +284,385 @@ boston %>%
 
 ```
 
-
-
 ## ISL Exercise 3.7.3 (12pts)
-**Answer** 
-(a) 
-iii is true.
-i:the equation to Salary = 50 + 20 * GPA + 0.07 * IQ + 35 * College + 0.01 * GPA * IQ - 10 * GPA * College
-We now can estimate that High School graduates earn an average of 50 + 20 * mean(GPA) + 0.07 * mean(IQ) + 0.01 * mean(GPA) * mean(IQ) and College graduates earn an average of 50 + 20 * mean(GPA) + 0.07 * mean(IQ) + 35 + 0.01 * mean(GPA) * mean(IQ) - 10 * mean(GPA). When you subtract out the common terms, you find out that College graduates earn an average of 35 - 10 * mean(GPA) more than High School graduates. Since we don't know the value of mean(GPA), we don't know whether High School graduates are outearning College graduates on average or not.
-ii:Again, this is indeterminate.
-iii:Since College are earning an average of 35 - 10 * mean(GPA) more than men, a higher GPA mean means that College earn less than high school graduates, so this is true.
-iv:Since college are earning an average of 35 - 10 * mean(GPA) more than high school graduates, a higher GPA mean means that college earn less than high school graduates, so this is false.
 
-**Answer** 
-(b) 137.1 (50 + 20*4 + 0.07*110 + 35 + 0.01*4*110 - 10*4)
+**Answer** (a) iii is true. i:the equation to Salary = 50 + 20 \* GPA +
+0.07 \* IQ + 35 \* College + 0.01 \* GPA \* IQ - 10 \* GPA \* College We
+now can estimate that High School graduates earn an average of 50 + 20
+\* mean(GPA) + 0.07 \* mean(IQ) + 0.01 \* mean(GPA) \* mean(IQ) and
+College graduates earn an average of 50 + 20 \* mean(GPA) + 0.07 \*
+mean(IQ) + 35 + 0.01 \* mean(GPA) \* mean(IQ) - 10 \* mean(GPA). When
+you subtract out the common terms, you find out that College graduates
+earn an average of 35 - 10 \* mean(GPA) more than High School graduates.
+Since we don't know the value of mean(GPA), we don't know whether High
+School graduates are outearning College graduates on average or not.
+ii:Again, this is indeterminate. iii:Since College are earning an
+average of 35 - 10 \* mean(GPA) more than men, a higher GPA mean means
+that College earn less than high school graduates, so this is true.
+iv:Since college are earning an average of 35 - 10 \* mean(GPA) more
+than high school graduates, a higher GPA mean means that college earn
+less than high school graduates, so this is false.
 
-**Answer** 
-(c) This is false, because the statistical significance of an interaction is different from the magnitude of the interaction. It's possible to have a lot of evidence for a small effect. Also, a small coefficient doesn't even mean the interaction effect is small, since it is very sensitive to the units of the two variables.
+**Answer** (b) 137.1 (50 + 20*4 + 0.07*110 + 35 + 0.01*4*110 - 10\*4)
 
+**Answer** (c) This is false, because the statistical significance of an
+interaction is different from the magnitude of the interaction. It's
+possible to have a lot of evidence for a small effect. Also, a small
+coefficient doesn't even mean the interaction effect is small, since it
+is very sensitive to the units of the two variables.
 
 ## ISL Exercise 3.7.15 (20pts)
 
+15. This problem involves the Boston data set, which we saw in the lab
+    for this chapter. We will now try to predict per capita crime rate
+    using the other variables in this data set. In other words, per
+    capita crime rate is the response, and the other variables are the
+    predictors.
+
+```{=html}
+<!-- -->
+```
+(a) For each predictor, fit a simple linear regression model to predict
+    the response. Describe your results. In which of the models is there
+    a statistically significant association between the predictor and
+    the response? Create some plots to back up your assertions.
+    **Answer** If p-value is less than 0.05, then it's statistically
+    significant. It indicates strong evidence against the null
+    hypothesis, as there is less than a 5% probability the null is
+    correct. Therefore, we reject the null hypothesis, and accept the
+    alternative hypothesis. The simple linear regression can be defined
+    by a model Y = β0 + β1X+ $$ where;
+    Y= Response variable
+    X = Predictor variable
+    β0= Intercept
+    β1= Slope
+    $$ = Irreducible error
+
+
+Crim (per capita crime rate) and zn (proportion of residential land
+zoned for lots over 25,000 sq.ft)
+Since the p-value of the crim vs zn model is 0.05, meaning the chance of
+having a null hypothesis (β0 ) is very low. Therefore we conclude that
+there is a statistically significant association between crim and zn.
+The model's R squared value of 0.04019 and Adjusted R squared value of
+0.03828 are relatively smaller which makes it less significant. From the
+summary statistics of the model:
+Y(crim) = β0 + β1(zn)X
+Y(crim)=4.45369−0.07393x
+
+```{r}
+#Loading the MASS package
+library(MASS)
+#reading the Boston Dataset
+data("Boston")
+attach(Boston)
+#linear model crim ~ zn
+linear_fit.zn <- lm(crim ~zn, data= Boston)
+summary(linear_fit.zn)
+#Ploting the model
+ggplot(linear_fit.zn, aes(x = zn, y = crim)) + 
+  geom_point( color = "red") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  xlab("zn") +
+  ylab("per capita crime rate 'crim") +
+  ggtitle("Relationship between crim and zn") +
+  theme_bw() + 
+  theme(panel.background = element_rect(colour = "black", linewidth = 1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+The above graph confirms that there is a low negative relationship
+between the per capita crime rate and zn.
+
+Per capita crime rate(crim) and Indus (proportion of non-retail business
+acres per town). There is a statistically significant relationship
+between the per capita and Indus. This is because the p-value of the
+model is 2e-16 which is far less than 0.05 The model can be described
+as:
+Y(crim)=β0 + β1(indus)X Y(crim)=−2.06374+0.50978x
+
+```{r}
+#linear model crim ~ indus
+linear_fit.indus <- lm(crim ~ indus, data= Boston)
+summary(linear_fit.indus)
+#Ploting the model
+ggplot(linear_fit.indus, aes(x = indus, y = crim)) + 
+  geom_point( color = "red") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  scale_x_continuous(breaks = seq(0, 30, by = 10)) + 
+  scale_y_continuous(breaks = seq(0, 90, by = 25)) +
+  xlab("indus") +
+  ylab("per capita crime rate 'crim") +
+  ggtitle("Relationship between crim and indus") +
+  theme_bw() + 
+  theme(panel.background = element_rect(colour = "black", linewidth = 1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+The above graph confirms that there is a slightly positive relationship
+between the per capita crime rate and indus.
+
+Per capita crime rate(crim) and chas (Charles River dummy variable (= 1
+if tract bounds river; 0 otherwise)). The p-value of the model is 0.209
+which is must great than 0.05 and this means that the chances of having
+a null hypothesis are high and therefore chas is not statistically
+significant. The R-squared value of 0.003124 and Adjusted R squared
+value of 0.001146 are extremely low which continues to confirm that
+there is no statistically significant association between per capita
+crime rate and chas. The model can be described as; Y(crim)=β0 +
+β1(chas)X Y(crim)=3.7444-1.8928x
+
+```{r}
+#linear model crim ~ chas
+linear_fit.chas <- lm(crim ~ chas, data= Boston)
+summary(linear_fit.chas)
+#Ploting the model
+plot(chas,crim,pch = 20, main = "Relationship between crim and chas")
+abline(linear_fit.chas,col = "green",lwd = 3)
+legend("topleft", c( "Regression"), col = c("green"), lty = c(1, 1))
+```
+
+The above graph illustrates that a change in chas is not accompanied by
+an increase in the per capita crime rate. And therefore we can conclude
+that there is no relationship between chas and the per capita crime
+rate.
+
+Per capita crime rate(crim) and nox (nitric oxides concentration (parts
+per 10 million)). The 2e-16 p-value of the model is far less than 0.05
+which makes the relationship between per capita crime rate and nitrogen
+oxide concentration statistically significant. Mathematically we can
+conclude that; Y(crim)=β0 + β1(nox)X Y(crim)=−13.7199+31.2490x
+
+```{r}
+#linear model crim ~ nox
+linear_fit.nox <- lm(crim ~ nox, data= Boston)
+summary(linear_fit.nox)
+##Ploting the model
+plot(nox,crim,pch = 20, main = "Relationship between crim and nox")
+abline(linear_fit.nox,col = "red",lwd = 3)
+legend("topleft", c( "Regression"), col = c("red"), lty = c(1, 1))
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and nitrogen oxide
+concentration. This low significant association is again confirmed by
+the low R squared value of 0.1772 and Adjusted R squared value of
+0.1756.
+
+Per capita crime rate(crim) and rm (average number of rooms per
+dwelling). There is a statistically significant association between the
+per capita crime rate and the average number of rooms per dwelling(rm)
+because of the p- of 6.35e-7 is smaller than 0.05. value. The model can
+be described as; Y(crim)=β0 + β1(rm)X Y(crim)=20.4818-2.6841x
+
+```{r}
+#linear model crim ~ rm
+linear_fit.rm <- lm(crim ~ rm, data= Boston)
+summary(linear_fit.rm)
+#Ploting the model
+plot(rm,crim,pch = 20, main = "Relationship between crim and rm")
+abline(linear_fit.rm,col = "blue",lwd = 3)
+legend("topleft", c( "Regression"), col = c("blue"), lty = c(1, 1))
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and the average number of
+rooms per dwelling. This low significant association is again confirmed
+by the low R squared value of 0.04807 and Adjusted R squared value of
+0.04618.
+
+Per capita crime rate(crim) and age (proportion of owner-occupied units
+built prior to 1940). The p-value of the model is 2.85e-16 which is far
+less than 0.05 and this means that there exists a statistically
+significant relationship between per capita crime and age. The model can
+be described as; Y(crim)=β0 + β1(age)X Y(crim)=−3.77791+0.10779x
+
+```{r}
+#linear model crim ~ age
+linear_fit.age <- lm(crim ~ age, data= Boston)
+summary(linear_fit.age)
+#Ploting the model
+plot(age,crim,pch = 20, main = "Relationship between crim and age")
+abline(linear_fit.age,col = "red",lwd = 3)
+legend("topleft", c( "Regression"), col = c("red"), lty = c(1, 1))
+
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and the proportion of
+owner-occupied units built prior to 1940. This low significant
+association is again confirmed by the low R squared value of 0.1244 and
+Adjusted R squared value of 0.1227.
+
+Per capita crime rate(crim) and dis (weighted mean of distances to five
+Boston employment centres). Because of the small p-value of 2e-16, there
+exists a statistically significant association between per capita crime
+rate and dis variable. Mathematically we can conclude that; Y(crim)=β0+
+β1(dis)X Y(crim)=9.4993-1.5509x
+
+```{r}
+#linear model crim ~ dis
+linear_fit.dis <- lm(crim ~ dis, data= Boston)
+summary(linear_fit.dis)
+#Ploting the model
+plot(dis,crim,pch = 20, main = "Relationship between crim and dis")
+abline(linear_fit.dis,col = "blue",lwd = 3)
+legend("topleft", c( "Regression"), col = c("blue"), lty = c(1, 1))
+```
+
+The above graph illustrates that there is a a low sloping relationship
+between the per capita crime rate and the weighted mean of distances to
+five Boston employment centres. This low significant association is
+again confirmed by the low R squared value of 0.1441 and Adjusted R
+squared value of 0.1425.
+
+Per capita crime rate(crim) and rad (index of accessibility to radial
+highways). The p-value of the model is 2.2e-16 which is far less than
+0.05 and this means that there exists a statistically significant
+relationship between per capita crime and rad. The model can be
+described as; Y(crim)=β0 + β1(rad)X Y(crim)=−2.28716+0.61791x
+
+```{r}
+#linear model crim ~ rad
+linear_fit.rad <- lm(crim ~ rad, data= Boston)
+summary(linear_fit.rad)
+#Ploting the model
+plot(rad,crim,pch = 20, main = "Relationship between crim and rad")
+abline(linear_fit.rad,col = "red",lwd = 3)
+legend("topleft", c( "Regression"), col = c("red"), lty = c(1, 1))
+
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and the index of
+accessibility to radial highways. This low significant association is
+again confirmed by the low R squared value of 0.3913 and Adjusted R
+squared value of 0.3899.
+
+Per capita crime rate(crim) and tax (full-value property-tax rate per
+\$10,000). The p-value of the model is 2.2e-16 which is far less than
+0.05 and this means that there exists a statistically significant
+relationship between per capita crime and tax. The model can be
+described as; Y(crim)=β0 + β1(tax)X Y(crim)=−8.52837+0.02974x
+
+```{r}
+#linear model crim ~ tax
+linear_fit.tax <- lm(crim ~ tax, data= Boston)
+summary(linear_fit.tax)
+#Ploting the model
+plot(tax,crim,pch = 20, main = "Relationship between crim and tax")
+abline(linear_fit.tax,col = "blue",lwd = 3)
+legend("topleft", c( "Regression"), col = c("blue"), lty = c(1, 1))
+
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and the full-value
+property-tax rate per \$10,000. This low significant association is
+again confirmed by the low R squared value of 0.3396 and Adjusted R
+squared value of 0.3381.
+
+Per capita crime rate(crim) and ptratio (pupil-teacher ratio by town).
+The p-value of the model is 2.2e-16 which is far less than 0.05 and this
+means that there exists a statistically significant relationship between
+per capita crime and ptratio. The model can be described as;
+Y(crim)=β0 + β1(ptratio)X Y(crim)=−17.64686+1.1520x
+
+```{r}
+#linear model crim ~ ptratio
+linear_fit.ptratio <- lm(crim ~ ptratio, data= Boston)
+summary(linear_fit.ptratio)
+#Ploting the model
+plot(ptratio,crim,pch = 20, main = "Relationship between crim and ptratio")
+abline(linear_fit.ptratio,col = "red",lwd = 3)
+legend("topleft", c( "Regression"), col = c("red"), lty = c(1, 1))
+
+
+```
+
+The above graph illustrates that there is a a slightly lower positive
+relationship between the per capita crime rate and the pupil-teacher
+ratio by town. This low significant association is again confirmed by
+the low R squared value of 0.08407 and Adjusted R squared value of
+0.08825.
+
+Per capita crime rate(crim) and lstat (lower status of the population
+(percent)). The p-value of 2e-16 is way below the 0.05 and therefore we
+can conclude that there is a statistically significant association
+between the per capita crime rate and lstat. Mathematically we can
+conclude that; Y(crim)=β0 + β_1 (lstat)X Y(crim)=-3.33054+0.54880x
+
+```{r}
+#linear model crim ~ lstat
+linear_fit.lstat <- lm(crim ~ lstat, data= Boston)
+summary(linear_fit.lstat)
+#Ploting the model
+plot(lstat,crim,pch = 20, main = "Relationship between crim and lstat",
+     ylab = "per capita crime rate 'crim'", xlab = "lower status of the population (percent)")
+abline(linear_fit.lstat,col = "green",lwd = 3)
+legend("topleft", c( "Regression"), col = c("green"), lty = c(1, 1))
+```
+
+The graph above illustrates and confirms the statistically significant
+positive relationship between the per capita crime rate and black. The
+association is quite small due to a low R squared value of 0.2076 and
+Adjusted R squared value of 0.206.
+
+Per capita crime rate(crim) and medv (median value of owner-occupied
+homes in \$1000s). There is a statistically significant association
+between the per capita crime rate and medv because of the small p-value
+of 2e-16. Mathematically we can conclude that; Y(crim)=β0 + β_1 (medv)X
+Y(crim)=11.79654-0.36316x
+
+```{r}
+#linear model crim ~ medv
+linear_fit.medv <- lm(crim ~ medv, data= Boston)
+summary(linear_fit.medv)
+#Ploting the model
+ggplot(linear_fit.medv, aes(x = medv, y = crim)) + 
+  geom_point( color = "red") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  scale_x_continuous(breaks = seq(0, 50, by = 10)) + 
+  scale_y_continuous(breaks = seq(0, 80, by = 20)) +
+  xlab("median value of owner-occupied homes in $1000s") +
+  ylab("per capita crime rate 'crim") +
+  ggtitle("Relationship between median value of homes and crime rate") +
+  theme_bw() + 
+  theme(panel.background = element_rect(colour = "black", linewidth = 1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+The graph above illustrates and confirms the statistically significant
+negative relationship between the per capita crime rate and medv. The
+association is quite small due to a low R squared value of 0.1508 and
+Adjusted R squared value of 0.1491.
+
+(b) Fit a multiple regression model to predict the response using all of
+    the predictors. Describe your results. For which predictors can we
+    reject the null hypothesis H0 : βj = 0?
+(c) How do your results from (a) compare to your results from (b)?
+    Create a plot displaying the univariate regression coefficients
+    from (a) on the x-axis, and the multiple regression coefficients
+    from (b) on the y-axis. That is, each predictor is displayed as a
+    single point in the plot. Its coefficient in a simple linear regres-
+    sion model is shown on the x-axis, and its coefficient estimate in
+    the multiple linear regression model is shown on the y-axis.
+(d) Is there evidence of non-linear association between any of the
+    predictors and the response? To answer this question, for each
+    predictor X, fit a model of the form Y =β0 +β1X+β2X2 +β3X3 +ε.
+
 ## Bonus question (20pts)
 
-For multiple linear regression, show that $R^2$ is equal to the correlation between the response vector $\mathbf{y} = (y_1, \ldots, y_n)^T$ and the fitted values $\hat{\mathbf{y}} = (\hat y_1, \ldots, \hat y_n)^T$. That is
-$$
+For multiple linear regression, show that $R^2$ is equal to the
+correlation between the response vector
+$\mathbf{y} = (y_1, \ldots, y_n)^T$ and the fitted values
+$\hat{\mathbf{y}} = (\hat y_1, \ldots, \hat y_n)^T$. That is $$
 R^2 = 1 - \frac{\text{RSS}}{\text{TSS}} = [\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}})]^2.
 $$
-
