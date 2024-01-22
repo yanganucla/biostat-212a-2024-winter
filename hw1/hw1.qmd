@@ -57,7 +57,10 @@ where the expectation averages over the variability in $y_0$ and $\hat f$.
 
 ```{r, eval = F}
 library(tidyverse)
-fit <- lm(sales ~ TV, data = )
+fit <- lm(sales ~ TV, data= )
+```
+
+```{r, eval = F}
 ```
 
 ## ISL Exercise 2.4.4 (10pts)
