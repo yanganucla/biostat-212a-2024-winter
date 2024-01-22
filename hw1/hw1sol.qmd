@@ -133,9 +133,7 @@ image.
 
 #### R
 
-**Answer**（a) There are 506 rows and 13 columns in this data set. Each
-row represents a census tract in Boston, and each column represents a
-predictor (or response).
+**Answer**（a) There are 506 rows and 13 columns in this data set. Each row represents a census tract in Boston, and each column represents a predictor.
 
 ```{r, evalue = F}
 library(tidyverse)
@@ -146,11 +144,7 @@ Boston <- read_csv("https://raw.githubusercontent.com/ucla-biostat-212a/2024wint
 
 #### R
 
-**Answer**（b) I explored some other scatterplots not shown below. In
-general there aren't many easily interpretable relationships between
-variables in this data set. Some pairs have clusters of data, but no
-overall trend; others have floor effects where most communities have a
-value of zero (e.g., crime).
+**Answer**（b) I explored some other scatterplots not shown below. In general, there aren't many easily interpretable relationships between variables in this data set. Some pairs have clusters of data, but no overall trend; others have floor effects where most communities have a value of zero.
 
 ```{r, eval = F}
 ggscatter <- function(x, y) {
@@ -182,8 +176,7 @@ ggscatter(ptratio, medv) +
 
 #### R
 
-**Answer**(c) Yes, lower socioeconomic status and less valuable homes
-are associated with higher crime rates.
+**Answer**(c) Yes, lower socioeconomic status and less valuable homes are associated with higher crime rates.
 
 ```{r, eval = F}
 ggscatter(crim, lstat) +
@@ -199,9 +192,7 @@ ggscatter(crim, medv) +
 
 #### R
 
-**Answer** Yes, some census tracts have particularly high crime rates,
-tax rates, and pupil-teacher ratios. The range of each predictor is
-shown below.
+**Answer** Yes, some census tracts have particularly high crime rates, tax rates, and pupil-teacher ratios. The range of each predictor is shown below.
 
 ```{r, eval = F}
 # draw histograms
@@ -244,13 +235,8 @@ boston %>%
 
 #### R
 
-**Answer**（g) The census tract with the lowest median value of
-owner-occupied homes is 399. The values of the other predictors for that
-census tract are shown below. crim: above 3rd quartile zn: at min indus:
-at 3rd quartile chas: not bounded by river nox: bove 3rd quartile rm:
-below 1st quartile age: at max dis: below 1st quartile rad: at max tax:
-at 3rd quartile ptratio: at 3rd quartile black: 399 at max; 406 above
-1st quartile lstat: above 3rd quartile medv: at min
+**Answer**（g) The census tract with the lowest median value of owner-occupied homes is 399. The values of the other predictors for that census tract are shown below. crim: above 3rd quartile, zn: at min indus: at 3rd quartile, chas: not bounded by river, nox: bove 3rd quartile, rm:
+below 1st quartile, age: at max, dis: below 1st quartile, rad: at max, tax: at 3rd quartile, ptratio: at 3rd quartile, lstat: above 3rd quartile, medv: at min.
 
 ```{r}
 # the below will display the first record
@@ -263,11 +249,7 @@ summary(Boston)
 
 #### R
 
-**Answer**(h) There are 64 census tracts that average more than seven
-rooms per dwelling, and 13 census tracts that average more than eight
-rooms per dwelling. The census tracts that average more than eight rooms
-per dwelling have a median value of owner-occupied homes that is higher
-than the overall median value of owner-occupied homes.
+**Answer**(h) There are 64 census tracts that average more than seven rooms per dwelling, and 13 census tracts that average more than eight rooms per dwelling. The census tracts that average more than eight rooms per dwelling have a median value of owner-occupied homes that is higher than the overall median value of owner-occupied homes.
 
 ```{r, eval = F}
 boston %>% 
@@ -286,69 +268,35 @@ boston %>%
 
 ## ISL Exercise 3.7.3 (12pts)
 
-**Answer** (a) iii is true. i:the equation to Salary = 50 + 20 \* GPA +
-0.07 \* IQ + 35 \* College + 0.01 \* GPA \* IQ - 10 \* GPA \* College We
-now can estimate that High School graduates earn an average of 50 + 20
-\* mean(GPA) + 0.07 \* mean(IQ) + 0.01 \* mean(GPA) \* mean(IQ) and
-College graduates earn an average of 50 + 20 \* mean(GPA) + 0.07 \*
-mean(IQ) + 35 + 0.01 \* mean(GPA) \* mean(IQ) - 10 \* mean(GPA). When
-you subtract out the common terms, you find out that College graduates
-earn an average of 35 - 10 \* mean(GPA) more than High School graduates.
-Since we don't know the value of mean(GPA), we don't know whether High
-School graduates are outearning College graduates on average or not.
-ii:Again, this is indeterminate. iii:Since College are earning an
-average of 35 - 10 \* mean(GPA) more than men, a higher GPA mean means
+**Answer** (a) iii is true. 
+i:the equation to Salary = 50 + 20 \* GPA + 0.07 \* IQ + 35 \* College + 0.01 \* GPA \* IQ - 10 \* GPA \* College 
+We can estimate that High School graduates earn an average of 50 + 20\* mean(GPA) + 0.07 \* mean(IQ) + 0.01 \* mean(GPA) \* mean(IQ) and College graduates earn an average of 50 + 20 \* mean(GPA) + 0.07 \*mean(IQ) + 35 + 0.01 \* mean(GPA) \* mean(IQ) - 10 \* mean(GPA). When you subtract out the common terms, you find out that College graduates
+earn an average of 35 - 10 \* mean(GPA) more than High School graduates. Since we don't know the value of mean(GPA), we don't know whether High School graduates are outearning College graduates on average or not.
+ii:Again, this is indeterminate. 
+iii:Since College are earning an \average of 35 - 10 \* mean(GPA) more than men, a higher GPA mean means
 that College earn less than high school graduates, so this is true.
-iv:Since college are earning an average of 35 - 10 \* mean(GPA) more
-than high school graduates, a higher GPA mean means that college earn
-less than high school graduates, so this is false.
+iv:Since college are earning an average of 35 - 10 \* mean(GPA) more than high school graduates, a higher GPA mean means that college earn less than high school graduates, so this is false.
 
-**Answer** (b) 137.1 (50 + 20*4 + 0.07*110 + 35 + 0.01*4*110 - 10\*4)
+**Answer** (b) 137.1 
+(50 + 20*4 + 0.07*110 + 35 + 0.01*4*110 - 10\*4)=137.1
 
-**Answer** (c) This is false, because the statistical significance of an
-interaction is different from the magnitude of the interaction. It's
-possible to have a lot of evidence for a small effect. Also, a small
-coefficient doesn't even mean the interaction effect is small, since it
+**Answer** (c) This is false, because the statistical significance of an interaction is different from the magnitude of the interaction. It's possible to have a lot of evidence for a small effect. Also, a small coefficient doesn't even mean the interaction effect is small, since it
 is very sensitive to the units of the two variables.
 
 ## ISL Exercise 3.7.15 (20pts)
 
-15. This problem involves the Boston data set, which we saw in the lab
-    for this chapter. We will now try to predict per capita crime rate
-    using the other variables in this data set. In other words, per
-    capita crime rate is the response, and the other variables are the
-    predictors.
-
-```{=html}
-<!-- -->
-```
-(a) For each predictor, fit a simple linear regression model to predict
-    the response. Describe your results. In which of the models is there
-    a statistically significant association between the predictor and
-    the response? Create some plots to back up your assertions.
-    **Answer** If p-value is less than 0.05, then it's statistically
-    significant. It indicates strong evidence against the null
-    hypothesis, as there is less than a 5% probability the null is
-    correct. Therefore, we reject the null hypothesis, and accept the
-    alternative hypothesis. The simple linear regression can be defined
-    by a model Y = β0 + β1X+ $$ where;
+**Answer** (a)
+H0:there is no relationship between X and Y 
+H1:there is some relationship between X and Y.
+If p-value is less than 0.05, then it's statistically significant. It indicates strong evidence against the null hypothesis, as there is less than a 5% probability the null is correct. Therefore, we reject the null hypothesis, and accept the alternative hypothesis. The simple linear regression can be defined by a model Y = β0 + β1X+ $$ where:
     Y= Response variable
     X = Predictor variable
     β0= Intercept
     β1= Slope
     $$ = Irreducible error
-
-
 Crim (per capita crime rate) and zn (proportion of residential land
-zoned for lots over 25,000 sq.ft)
-Since the p-value of the crim vs zn model is 0.05, meaning the chance of
-having a null hypothesis (β0 ) is very low. Therefore we conclude that
-there is a statistically significant association between crim and zn.
-The model's R squared value of 0.04019 and Adjusted R squared value of
-0.03828 are relatively smaller which makes it less significant. From the
-summary statistics of the model:
-Y(crim) = β0 + β1(zn)X
-Y(crim)=4.45369−0.07393x
+zoned for lots over 25,000 sq.ft) 
+Since the p-value of the crim vs zn model is 0.05, meaning the chance of having a null hypothesis (β0 ) is very low. Therefore we conclude that there is a statistically significant association between crim and zn. The model's R squared value of 0.04019 and Adjusted R squared value of 0.03828 are relatively smaller which makes it less significant. From the summary statistics of the model: Y(crim) = β0 + β1(zn)X Y(crim)=4.45369−0.07393x
 
 ```{r}
 #Loading the MASS package
@@ -380,8 +328,7 @@ Per capita crime rate(crim) and Indus (proportion of non-retail business
 acres per town). There is a statistically significant relationship
 between the per capita and Indus. This is because the p-value of the
 model is 2e-16 which is far less than 0.05 The model can be described
-as:
-Y(crim)=β0 + β1(indus)X Y(crim)=−2.06374+0.50978x
+as: Y(crim)=β0 + β1(indus)X Y(crim)=−2.06374+0.50978x
 
 ```{r}
 #linear model crim ~ indus
@@ -543,11 +490,9 @@ accessibility to radial highways. This low significant association is
 again confirmed by the low R squared value of 0.3913 and Adjusted R
 squared value of 0.3899.
 
-Per capita crime rate(crim) and tax (full-value property-tax rate per
-\$10,000). The p-value of the model is 2.2e-16 which is far less than
-0.05 and this means that there exists a statistically significant
-relationship between per capita crime and tax. The model can be
-described as; Y(crim)=β0 + β1(tax)X Y(crim)=−8.52837+0.02974x
+Per capita crime rate(crim) and tax (full-value property-tax rate per \$10,000). 
+The p-value of the model is 2.2e-16 which is far less than 0.05 and this means that there exists a statistically significant relationship between per capita crime and tax. The model can be described as: 
+Y(crim)=β0 + β1(tax)X Y(crim)=−8.52837+0.02974x
 
 ```{r}
 #linear model crim ~ tax
@@ -560,11 +505,27 @@ legend("topleft", c( "Regression"), col = c("blue"), lty = c(1, 1))
 
 ```
 
-The above graph illustrates that there is a a slightly lower positive
-relationship between the per capita crime rate and the full-value
-property-tax rate per \$10,000. This low significant association is
-again confirmed by the low R squared value of 0.3396 and Adjusted R
-squared value of 0.3381.
+The above graph illustrates that there is a a slightly lower positive relationship between the per capita crime rate and the full-value property-tax rate per \$10,000. This low significant association is again confirmed by the low R squared value of 0.3396 and Adjusted R squared value of 0.3381.
+
+
+Per capita crime rate(crim) and black. 
+The p-value of the model is 2.2e-16 which is far less than 0.05 and this means that there exists a statistically significant relationship between per capita crime and black. The model can be described as:
+Y(crim)=β0 + β1(black)X 
+Y(crim)=16.55353-0.03628x
+
+```{r}
+#linear model crim ~ black
+linear_fit.black <- lm(crim ~ black, data= Boston)
+summary(linear_fit.black)
+#Ploting the model
+plot(black,crim,pch = 20, main = "Relationship between crim and black")
+abline(linear_fit.black,col = "red",lwd = 3)
+legend("topleft", c( "Regression"), col = c("red"), lty = c(1, 1))
+
+
+```
+
+The above graph illustrates that there is a a slightly negative relationship between the per capita crime rate and the black. This low significant association is again confirmed by the low R squared value of 0.1483 and Adjusted R squared value of 0.1466.
 
 Per capita crime rate(crim) and ptratio (pupil-teacher ratio by town).
 The p-value of the model is 2.2e-16 which is far less than 0.05 and this
@@ -644,19 +605,133 @@ negative relationship between the per capita crime rate and medv. The
 association is quite small due to a low R squared value of 0.1508 and
 Adjusted R squared value of 0.1491.
 
-(b) Fit a multiple regression model to predict the response using all of
-    the predictors. Describe your results. For which predictors can we
-    reject the null hypothesis H0 : βj = 0?
-(c) How do your results from (a) compare to your results from (b)?
-    Create a plot displaying the univariate regression coefficients
-    from (a) on the x-axis, and the multiple regression coefficients
-    from (b) on the y-axis. That is, each predictor is displayed as a
-    single point in the plot. Its coefficient in a simple linear regres-
-    sion model is shown on the x-axis, and its coefficient estimate in
-    the multiple linear regression model is shown on the y-axis.
-(d) Is there evidence of non-linear association between any of the
-    predictors and the response? To answer this question, for each
-    predictor X, fit a model of the form Y =β0 +β1X+β2X2 +β3X3 +ε.
+
+**Answer**(b) 
+    
+```{r}
+#Multiple linear regression
+multi_fit <- lm(crim ~ ., data= Boston)
+summary(multi_fit)
+```
+```{r}
+# Better summary table
+library(gtsummary)
+multi_fit %>%
+  tbl_regression() %>%
+  bold_labels() %>%
+  bold_p(t = 0.05) %>%
+  modify_column_unhide(columns = c(statistic, std.error)) %>%
+  add_glance_source_note(
+    label = list(sigma ~ "\U03C3"),
+    include = c(r.squared, sigma)
+  )
+```
+
+The above model shows that the predictors zn, dis, rad, black and medv are statistically significant because their p-values are less than 0.05. Other remaining variables because of their high p-values, we cannot reject the null hypothesis (H0: βj= 0).In conclusion, we can only reject the null hypothesis for “zn”, ”dis”, ”rad”, ”black” and “medv”. The multiple regression model generally does not fit the Boston dataset very well because of the low R squared value of 0.454 and the Adjusted R squared value of 0.4396
+
+**Answer**(c)
+```{r}
+#Plotting a scatter plot of Multiple regression Vs Univariate regression coefficients 
+univeriate_reg <- vector("numeric",0)
+univeriate_reg <- c(univeriate_reg, linear_fit.zn$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.indus$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.chas$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.nox$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.rm$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.age$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.dis$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.rad$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.tax$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.ptratio$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.black$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.lstat$coefficient[2])
+univeriate_reg <- c(univeriate_reg, linear_fit.medv$coefficient[2])
+multiple_reg <- vector("numeric", 0)
+multiple_reg <- c(multiple_reg, multi_fit$coefficients)
+multiple_reg <- multiple_reg[-1]
+plot(univeriate_reg, multiple_reg, col = "blue",pch =19, ylab = "multiple regression coefficients",
+     xlab = "Univariate Regression coefficients",
+     main = "Relationship between Multiple regression \n and univariate regression coefficients")
+
+```
+
+Univariate and multiple regression coefficients have a distinct difference. This is because the slope of the simple regression model represents the average effect of an increase in the predictor ignoring the other predictors in the dataset. But multiple regression holds other predictors fixed, and its slope represents the average effect of an increase in the predictor.
+
+We have seen in the above-fitted models that multiple regression suggests no relationship between per capita crime rate and most of the predictors while for the simple regression it’s vice versa and this because there is some strong correlation between some predictors as shown in the correlation table below.
+
+```{r}
+#Correlation table
+library(corrplot)
+correlation <- cor(Boston)
+corrplot(correlation, method = "circle", type = "upper", tl.col = "black", tl.srt = 45)
+```
+
+**Answer**(d) 
+
+```{r}
+poly_zn <- lm(crim ~ poly(zn, 3), data = Boston)
+summary(poly_zn)
+```
+
+```{r}
+poly_indus <- lm(crim ~ poly(indus, 3), data = Boston)
+summary(poly_indus)
+```
+
+```{r}
+poly_nox <- lm(crim ~ poly(nox, 3), data = Boston)
+summary(poly_nox)
+```
+
+```{r}
+poly_age <- lm(crim ~ poly(age, 3), data = Boston)
+summary(poly_age)
+```
+
+```{r}
+poly_dis <- lm(crim ~ poly(dis, 3), data = Boston)
+summary(poly_dis)
+```
+
+```{r}
+poly_rad <- lm(crim ~ poly(rad, 3), data = Boston)
+summary(poly_rad)
+```
+
+```{r}
+poly_tax <- lm(crim ~ poly(tax, 3), data = Boston)
+summary(poly_tax)
+```
+
+```{r}
+poly_ptratio <- lm(crim ~ poly(ptratio, 3), data = Boston)
+summary(poly_ptratio)
+```
+
+```{r}
+poly_black <- lm(crim ~ poly(black, 3), data = Boston)
+summary(poly_black)
+```
+
+```{r}
+poly_lstat <- lm(crim ~ poly(lstat, 3), data = Boston)
+summary(poly_lstat)
+```
+
+```{r}
+poly_medv <- lm(crim ~ poly(medv, 3), data = Boston)
+summary(poly_medv)
+```
+
+
+```{r}
+poly_rm <- lm(crim ~ poly(rm, 3), data = Boston)
+summary(poly_rm)
+
+```
+
+From the above summary tables, we can see that the p-values for the indus, nox, age, dis, ptratio, medv are less than 0.05. This means that we can reject the null hypothesis (H0: βj= 0) and conclude that there is a non-linear association between the per capita crime rate and these predictors.
+
 
 ## Bonus question (20pts)
 
