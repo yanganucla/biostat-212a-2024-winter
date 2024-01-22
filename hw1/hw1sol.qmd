@@ -735,9 +735,38 @@ From the above summary tables, we can see that the p-values for the indus, nox, 
 
 ## Bonus question (20pts)
 
-For multiple linear regression, show that $R^2$ is equal to the
-correlation between the response vector
-$\mathbf{y} = (y_1, \ldots, y_n)^T$ and the fitted values
-$\hat{\mathbf{y}} = (\hat y_1, \ldots, \hat y_n)^T$. That is $$
-R^2 = 1 - \frac{\text{RSS}}{\text{TSS}} = [\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}})]^2.
-$$
+**Answer**
+
+$$R^2 = 1 - \frac{\text{RSS}}{\text{TSS}}$$
+$$\text{RSS} = \sum_{i=1}^{n} (y_i - \hat{y_i})^2$$
+$$\text{TSS} = \sum_{i=1}^{n} (y_i - \bar{y})^2$$
+$$\text{RSS} = \sum_{i=1}^{n} (y_i - \hat{y_i})^2 = (\mathbf{y} - \hat{\mathbf{y}})^T (\mathbf{y} - \hat{\mathbf{y}})$$
+$$\text{TSS} = \sum_{i=1}^{n} (y_i - \bar{y})^2 = (\mathbf{y} - \bar{\mathbf{y}})^T (\mathbf{y} - \bar{\mathbf{y}})$$
+
+$$\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\operatorname{Cov}(\mathbf{y}, \hat{\mathbf{y}})}{\sigma_{\mathbf{y}} \sigma_{\hat{\mathbf{y}}}}$$
+$$\operatorname{Cov}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{1}{n} (\mathbf{y} - \bar{\mathbf{y}})^T (\hat{\mathbf{y}} - \bar{\mathbf{y}})$$
+$$\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\frac{1}{n} (\mathbf{y} - \bar{\mathbf{y}})^T (\hat{\mathbf{y}} - \bar{\mathbf{y}})}{\sigma_{\mathbf{y}} \sigma_{\hat{\mathbf{y}}}}$$
+$$\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\frac{1}{n} (\mathbf{y} - \bar{\mathbf{y}})^T (\mathbf{y} - \bar{\mathbf{y}})}{\sigma_{\mathbf{y}} \sigma_{\hat{\mathbf{y}}}} \cdot \frac{\frac{1}{n} (\hat{\mathbf{y}} - \bar{\mathbf{y}})^T (\hat{\mathbf{y}} - \bar{\mathbf{y}})}{\frac{1}{n} (\hat{\mathbf{y}} - \bar{\mathbf{y}})^T (\hat{\mathbf{y}} - \bar{\mathbf{y}})}$$
+$$\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\text{TSS}}{\sigma_{\mathbf{y}} \sigma_{\hat{\mathbf{y}}}} \cdot \frac{\text{RSS}}{\text{RSS}} = \frac{\text{TSS}}{\text{RSS}}$$
+$$R^2 = 1 - \frac{\text{RSS}}{\text{TSS}} = 1 - \frac{\text{TSS}}{\text{RSS}} = [\operatorname{Cor}(\mathbf{y}, \hat{\mathbf{y}})]^2$$
+
+```{r}
+#Loading the Boston dataset
+library(MASS)
+data(Boston)
+#Fitting the multiple regression model
+multi_fit <- lm(crim ~ ., data = Boston)
+#Calculating the R squared value
+r.squared <- summary(multi_fit)$r.squared
+#Calculating the correlation between the response vector and the fitted values
+correlation <- cor(Boston$crim, multi_fit$fitted.values)
+#Calculating the square of the correlation
+correlation.squared <- correlation^2
+#Comparing the two values
+r.squared
+correlation.squared
+
+```
+
+From the above code, we can see that the two values are equal. This means that $R^2$ is equal to the correlation between the response vector and the fitted values.
+
