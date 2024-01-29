@@ -24,6 +24,20 @@ knitr:
 
 ## ISL Exercise 4.8.1 (10pts)
 
+1. Using a little bit of algebra, prove that (4.2) is equivalent to (4.3). In other words, the logistic function representation and logit representation for the logistic regression model are equivalent.
+**Answer**
+$$
+\begin{aligned}
+\frac{p(X)}{1-p(X)} &= e^{\beta_0 + \beta_1 X} \\
+p(X) &= e^{\beta_0 + \beta_1 X} (1-p(X)) \\
+p(X) &= e^{\beta_0 + \beta_1 X} - e^{\beta_0 + \beta_1 X} p(X) \\
+p(X) + e^{\beta_0 + \beta_1 X} p(X) &= e^{\beta_0 + \beta_1 X} \\
+p(X) &= \frac{e^{\beta_0 + \beta_1 X}}{1 + e^{\beta_0 + \beta_1 X}} \\
+p(X) &= \frac{1}{1 + e^{-(\beta_0 + \beta_1 X)}}
+\end{aligned}
+$$
+
+
 ## ISL Exercise 4.8.6 (10pts)
 
 ## ISL Exercise 4.8.9 (10pts)
