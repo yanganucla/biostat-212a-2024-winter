@@ -39,6 +39,35 @@ $$
 
 
 ## ISL Exercise 4.8.6 (10pts)
+ Suppose we collect data for a group of students in a statistics class with variables X1 = hours studied, X2 = undergrad GPA, and Y = receive an A. We fit a logistic regression and produce estimated coefficient, βˆ0 = −6, βˆ1 = 0.05, βˆ2 = 1.
+(a) Estimate the probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class.
+(b) How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+**Answer**
+(a)Probability that a student who studies for 40 hours and has an undergrad GPA of 3.5 gets an A in the class is 0.3775.
+$$
+\begin{aligned}
+p(X) &= \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2)}} \\
+p(X) &= \frac{1}{1 + e^{-(\beta_0 + \beta_1 40 + \beta_2 3.5)}} \\
+p(X) &= \frac{1}{1 + e^{-(-6 + 2.0 + 3.5)}} \\
+p(X) &= \frac{1}{1 + e^{-0.5}} \\
+p(X) &= \frac{1}{1 + 1.6487} \\
+p(X) &= \frac{1}{2.6487} \\
+p(X) &= 0.3775
+\end{aligned}
+$$
+(b)the student in part (a) Should need to study 50 hours to have a 50% chance of getting an A in the class.
+$$
+\begin{aligned}
+p(X) &= \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2)}} \\
+0.5 &= \frac{1}{1 + e^{-(-6 + 0.05 x_1 + 3.5)}} \\
+0.5 &= \frac{1}{1 + e^{2.5 - 0.05 x_1}} \\
+1 + e^{2.5 - 0.05 x_1} &= 2 \\
+e^{2.5 - 0.05 x_1} &= 1 \\
+2.5 - 0.05 x_1 &= 0 \\
+0.05 x_1 &= 2.5 \\
+x_1 &= 50
+\end{aligned}
+$$
 
 ## ISL Exercise 4.8.9 (10pts)
 
