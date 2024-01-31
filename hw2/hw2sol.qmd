@@ -70,6 +70,32 @@ x_1 &= 50
 $$
 
 ## ISL Exercise 4.8.9 (10pts)
+9. This problem has to do with odds.
+(a) On average, what fraction of people with an odds of 0.37 of
+defaulting on their credit card payment will in fact default?
+**Answer**(a) 27% of people with an odds of 0.37 of defaulting on their credit card payment will in fact default.
+$$
+\begin{aligned}
+\frac{p(X)}{1-p(X)} &= 0.37 \\
+p(X) &= 0.37(1-p(X)) \\
+p(X) &= 0.37 - 0.37p(X) \\
+p(X) + 0.37p(X) &= 0.37 \\
+1.37p(X) &= 0.37 \\
+p(X) &= \frac{0.37}{1.37} \\
+p(X) &= 0.2701
+\end{aligned}
+$$
+
+(b) Suppose that an individual has a 16% chance of defaulting on her credit card payment. What are the odds that she will de- fault?
+**Answer** (b) The odds that she will default is 0.1905.
+$$
+\begin{aligned}
+odds &= \frac{0.16}{1-0.16} \\
+odds &= \frac{0.16}{0.84} \\
+odds &= 0.1905
+\end{aligned}
+$$
+
 
 ## ISL Exercise 4.8.13 (a)-(i) (50pts)
 
