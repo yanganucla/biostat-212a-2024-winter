@@ -98,7 +98,223 @@ $$
 
 
 ## ISL Exercise 4.8.13 (a)-(i) (50pts)
+13. This question should be answered using the Weekly data set, which is part of the ISLR2 package. This data is similar in nature to the Smarket data from this chapter’s lab, except that it contains 1,089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+(a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+**Answer**
+```{r}
+library(ISLR2)
+library(corrplot)
+data(Weekly)
+head(Weekly)
+summary(Weekly)
+pairs(Weekly)
+corrplot(cor(Weekly[,-9]), method="square")
+
+```
+The only variables that appear to have any signifincant linear relation are year and volume.
+
+(b) Use the full data set to perform a logistic regression with
+Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+**Answer**
+```{r}
+attach(Weekly)
+glm.fit <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, data=Weekly, family=binomial)
+summary(glm.fit)
+
+```
+The only variable that was statistically significant at the level of significance α=0.05 is Lag2. Otherwise the other variables fail to reject the null hypothesis: β = 0.
+
+(c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+**Answer**
+```{r}
+glm.probs <- predict(glm.fit, type="response")
+glm.pred <- rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <- "Up"
+table(glm.pred, Weekly$Direction)
+mean(glm.pred == Weekly$Direction)
+
+```
+The percentage of current predictions: 56.11% (54+557)(54+48+430+557)=0.5611
+This illustrates that the model predicted the weekly market trend correctly 56.11% of the time. 
+Separating in how the model correctly predicts the Up and Down trends. While the model correctly predicted the Up weekly trends 557/(48+557)=0.9207: 92.07% correct. In contrast Down weekly trends were predicted at a lower rate, 544/(30+54)=0.1115: or only 11.15% correctly predicted.
+
+(d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+**Answer**
+```{r}
+train <- (Weekly$Year < 2009)
+Weekly.2009 <- Weekly[!train,]
+Direction.2009 <- Weekly$Direction[!train]
+glm.fit <- glm(Direction ~ Lag2, data=Weekly, family=binomial, subset=train)
+glm.probs <- predict(glm.fit, Weekly.2009, type="response")
+glm.pred <- rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <- "Up"
+table(glm.pred, Direction.2009)
+mean(glm.pred == Direction.2009)
+
+
+```
+When spliting up the whole Weekly dataset into a training and test dataset, the model correctly predicted weekly trends at rate of 62.5%, which is a moderate improvement from the model that utilized the whole dataset. Also this model such as the previous one did better at predicting upward trends(91.80%) compared to downward trends(20.93%); although this model was able to improve significantly on correctly predicting downward trends.
+(e) Repeat (d) using LDA.
+**Answer**
+```{r}
+library(MASS)
+lda.fit <- lda(Direction ~ Lag2, data=Weekly, subset=train)
+lda.pred <- predict(lda.fit, Weekly.2009)
+table(lda.pred$class, Direction.2009)
+mean(lda.pred$class == Direction.2009)
+```
+The LDA model was able to correctly predict weekly trends at a rate of 62.5%, which is the same as the logistic regression model.
+
+(f) Repeat (d) using QDA.
+**Answer**
+```{r}
+qda.fit <- qda(Direction ~ Lag2, data=Weekly, subset=train)
+qda.pred <- predict(qda.fit, Weekly.2009)
+table(qda.pred$class, Direction.2009)
+mean(qda.pred$class == Direction.2009)
+
+```
+Quadratic Linear Analysis created a model with an accuracy of 58.65%, which is lower than the previous methods. Also this model only considered predicting the correctness of weekly upward trends disregrading the downward weekly trends.
+
+(g) Repeat (d) using KNN with K = 1.
+**Answer**
+```{r}
+library(class)
+train.X <- as.matrix(Lag2[train])
+test.X <- as.matrix(Lag2[!train])
+train.Direction <- Direction[train]
+set.seed(1)
+knn.pred <- knn(train.X, test.X, train.Direction, k=1)
+table(knn.pred, Direction.2009)
+mean(knn.pred == Direction.2009)
+
+```
+The K-Nearest neighbors resulted in a classifying model with an accuracy rate of 50% which is equal to random chance.
+
+(h) Repeat (d) using naive Bayes.
+**Answer**
+```{r}
+library(e1071)
+naive.fit <- naiveBayes(Direction ~ Lag2, data=Weekly, subset=train)
+naive.fit
+naive.pred <- predict(naive.fit, Weekly.2009)
+table(naive.pred, Direction.2009)
+mean(naive.pred == Direction.2009)
+
+```
+We can see from this that the prior probabilities for Down and Up are .4477 and .5522 respectively. The table shows that the naive Bayes correctly predicts an increase in the stock market 61 weeks. The naive Bayes makes a correct prediction 58.65% of the time.
+
+(i) Which of these methods appears to provide the best results on this data?
+**Answer**
+The methods that have the highest accuracy rates are the Logistic Regression and Linear Discriminant Analysis; both having rates of 62.5%.
 
 ## Bonus question: ISL Exercise 4.8.13 Part (j) (30pts)
+(j) Experiment with different combinations of predictors, includ- ing possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+**Answer**
+```{r}
+# Logistic Regression
+glm.fit <- glm(Direction ~ Lag2 + Lag1, data=Weekly, family=binomial, subset=train)
+glm.probs <- predict(glm.fit, Weekly.2009, type="response")
+glm.pred <- rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <- "Up"
+table(glm.pred, Direction.2009)
+mean(glm.pred == Direction.2009)
+
+# LDA
+lda.fit <- lda(Direction ~ Lag2 + Lag3, data=Weekly, subset=train)
+lda.pred <- predict(lda.fit, Weekly.2009)
+table(lda.pred$class, Direction.2009)
+mean(lda.pred$class == Direction.2009)
+
+# QDA
+qda.fit <- qda(Direction ~ Lag2 + Lag1, data=Weekly, subset=train)
+qda.pred <- predict(qda.fit, Weekly.2009)
+table(qda.pred$class, Direction.2009)
+mean(qda.pred$class == Direction.2009)
+
+# KNN
+knn.pred <- knn(train.X, test.X, train.Direction, k=3)
+table(knn.pred, Direction.2009)
+mean(knn.pred == Direction.2009)
+
+# Naive Bayes
+naive.fit <- naiveBayes(Direction ~ Lag2 + Lag5, data=Weekly, subset=train)
+naive.pred <- predict(naive.fit, Weekly.2009)
+table(naive.pred, Direction.2009)
+mean(naive.pred == Direction.2009)
+
+```
+Despite trying many different transformations using multiple predictors, nothing was able to surpass the original logistic regression and LDA that used just Lag2.
 
 ## Bonus question: ISL Exercise 4.8.4 (30pts)
+4. When the number of features p is large, there tends to be a deteri-
+oration in the performance of KNN and other local approaches that
+perform prediction using only observations that are near the test ob-
+servation for which a prediction must be made. This phenomenon is
+known as the curse of dimensionality, and it ties into the fact that curse of di- non-parametric approaches often perform poorly when p is large. We
+will now investigate this curse.
+(a) Suppose that we have a set of observations, each with measurements on p = 1 feature, X. We assume that X is uniformly (evenly) distributed on [0, 1]. Associated with each observation is a response value. Suppose that we wish to predict a test observation’s response using only observations that are within 10 % of the range of X closest to that test observation. For instance, in order to predict the response for a test observation with X = 0.6, we will use observations in the range [0.55,0.65]. On average, what fraction of the available observations will we use to make the prediction?
+**Answer**
+It is clear that if x∈[0.05,0.95] then the observations we will use are in the interval [x−0.05,x+0.05] and consequently represents a length of 0.1
+ which represents a fraction of 10%. If x<0.05, then we will use observations in the interval [0,x+0.05] which represents a fraction of (100x+5)%; by a similar argument we conclude that if x>0.95, then the fraction of observations we will use is (105−100x)%. To compute the average fraction we will use to make the prediction we have to evaluate the following expression
+```{r}
+integrate(function(x) ifelse(x<0.05, 100*x+5, ifelse(x>0.95, 105-100*x, 10)), 0, 1)
+```
+So we may conclude that, on average, the fraction of available observations we will use to make the prediction is 9.75%.
+
+(b) Now suppose that we have a set of observations, each with measurements on p = 2 features, X1 and X2. We assume that (X1 , X2 ) are uniformly distributed on [0, 1] × [0, 1]. We wish to predict a test observation’s response using only observations that are within 10 % of the range of X1 and within 10 % of the range of X2 closest to that test observation. For instance, in order to predict the response for a test observation with X1 = 0.6 and X2 = 0.35, we will use observations in the range [0.55, 0.65] for X1 and in the range [0.3,0.4] for X2. On average, what fraction of the available observations will we use to make the prediction?
+**Answer**
+If we assume X1 and X2 to be independant, the fraction of available observations we will use to make the prediction is 9.75%×9.75%=0.950625%.
+
+(c) Now suppose that we have a set of observations on p = 100 fea- tures. Again the observations are uniformly distributed on each feature, and again each feature ranges in value from 0 to 1. We wish to predict a test observation’s response using observations within the 10 % of each feature’s range that is closest to that test observation. What fraction of the available observations will we use to make the prediction?
+**Answer**
+With the same argument than (a) and (b), we may conclude that the fraction of available observations we will use to make the prediction is 9.75%100≃0%.
+
+(d) Using your answers to parts (a)–(c), argue that a drawback of KNN when p is large is that there are very few training obser- vations “near” any given test observation.
+**Answer**
+The fraction of available observations we will use to make the prediction decreases exponentially with the number of features p. This means that when p is large, the fraction of available observations we will use to make the prediction is very small. This implies that there are very few training observations “near” any given test observation, which is a drawback of KNN when p is large. As we saw in (a)-(c), the fraction of available observations we will use to make the prediction is (9.75%)^p with p the number of features. So when p→∞, we have limp→∞(9.75%)^p=0.
+
+(e) Now suppose that we wish to make a prediction for a test observation by creating a p-dimensional hypercube centered around the test observation that contains, on average, 10 % of the train- ing observations. For p = 1, 2, and 100, what is the length of each side of the hypercube? Comment on your answer.
+Note: A hypercube is a generalization of a cube to an arbitrary number of dimensions. When p = 1, a hypercube is simply a line segment, when p = 2 it is a square, and when p = 100 it is a 100-dimensional cube.
+**Answer**
+The length of each side of the hypercube is the range of the features that we will use to make the prediction. We have to find the value of x such that the fraction of available observations we will use to make the prediction is 10%. So we may conclude that the length of each side of the hypercube is 0.1^(1/p) with p the number of features. 
+When p=1, the length of the side of the hypercube is 0.1. 
+For p = 2, the length must be 0.1^1/2= 0.316. The ‘hyper-cube’ (here, a square) must extend further into each dimension in the training space and use observations further away in order that 10% of the training observations are used for prediction. We saw in part (b) that, if the sides stay of length 0.1 (only going within 10% of the range for both dimensions), only 1% of training observations will be used for prediction. 
+When p=100, the length of the side of the hypercube is 0.1^1/100=0.9772372. In order for 10% of the training observations to fall within the cube, each side of the cube must extend further and further into the range of each of the p dimensions. These 10% of training observations selected aren’t really ‘close’ at all. We may conclude that the length of each side of the hypercube decreases with the number of features p.
+The image below shows a simulated example where p = 2.
+```{r}
+library(dplyr)
+library(ggplot2)
+set.seed(1)
+test_obs <- data.frame(x1 = 0.25, x2 = 0.58)
+unif_sim <- data.frame(x1 = runif(100000, 0, 1), x2 = runif(100000, 0, 1))
+
+unif_sim %>%
+  sample_n(10000) %>%
+  ggplot(aes(x = x1, y = x2)) + 
+  geom_point(alpha = 0.5) + 
+  geom_rect(xmin = test_obs$x1 - (0.1^0.5)/2, 
+            xmax = test_obs$x1 + (0.1^0.5)/2, 
+            ymin = test_obs$x2 - (0.1^0.5)/2, 
+            ymax = test_obs$x2 + (0.1^0.5)/2, 
+            alpha = 0.01, fill = "deepskyblue3") + 
+  geom_point(data = test_obs, col = "red", size = 3) +
+  theme_light() + 
+  labs(title = "p = 2 hyper-cube, side length = 0.316", 
+       subtitle = "10,000 simulated obs: (x1, x2) ~ unif[0,1] x unif[0,1]")
+```
+The test observation X for which we predict is shown in red. The hyper-cube is shown in blue. The 10,000 simulated observations are shown in light grey. The hyper-cube extends further into each dimension in the training space and uses observations further away in order that 10% of the training observations are used for prediction.
+```{r}
+test_obs
+```
+We can see that, if a hyper-cube with sides of length 0.1^1/2 = 0.316 is created around X, this contains approx 10% of the training observations as required:
+```{r}
+unif_sim %>%
+  filter(x1 > test_obs$x1 - (0.1^0.5)/2,
+         x1 < test_obs$x1 + (0.1^0.5)/2,
+         x2 > test_obs$x2 - (0.1^0.5)/2,
+         x2 < test_obs$x2 + (0.1^0.5)/2) %>%
+  nrow() / nrow(unif_sim)
+```
+
+
