@@ -1,7 +1,7 @@
 ---
 title: "Biostat 212A Homework 3"
 subtitle: "Due Feb 20, 2024 @ 11:59PM"
-author: "YOUR NAME and UID"
+author: "Yang An and UID:106332601"
 date: today
 format:
   html:
@@ -23,6 +23,62 @@ knitr:
 ---
 
 ## ISL Exercise 5.4.2 (10pts)
+2. We will now derive the probability that a given observation is part of a bootstrap sample. Suppose that we obtain a bootstrap sample from a set of n observations.
+(a) What is the probability that the first bootstrap observation is not the jth observation from the original sample? 
+
+The probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n. This is because the probability of the first bootstrap observation being the jth observation from the original sample is 1/n. Therefore, the probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n.
+
+
+(b) What is the probability that the second bootstrap observation is not the jth observation from the original sample?
+
+The probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n. This is because the probability of the second bootstrap observation being the jth observation from the original sample is 1/n. Therefore, the probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n.
+(c) Argue that the probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n.
+
+The probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n. This is because the probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n. The probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n. Therefore, the probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n.
+
+(d) When n = 5, what is the probability that the jth observation is in the bootstrap sample?
+
+When n = 5, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/5)^5 = 0.67232.
+
+(e) When n = 100, what is the probability that the jth observation is in the bootstrap sample?
+
+When n = 100, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/100)^100 = 0.6339676587267709.
+
+(f) When n = 10, 000, what is the probability that the jth observa- tion is in the bootstrap sample?
+
+When n = 10, 000, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/10,000)^10,000 = 0.6321.
+
+(g) Create a plot that displays, for each integer value of n from 1 to 100,000, the probability that the jth observation is in the bootstrap sample. Comment on what you observe.
+
+```{r}
+library(ggplot2)
+boot1 <- data.frame(n = 1:100000)
+boot1$prob <- 1 - (1 - 1/boot1$n)^boot1$n
+ggplot(data = boot1, aes(x = n, y = prob)) +
+  geom_line() +
+  labs(title = "Probability that the jth observation is in the bootstrap sample",
+       x = "n",
+       y = "Probability") +
+  theme_bw() +
+  theme(text = element_text(size = 8))
+
+```
+The plot shows that the probability that the jth observation is in the bootstrap sample decreases as n increases. The probability that the jth observation is in the bootstrap sample is 1 when n = 1, and it decreases to 0.6321 when n = 10,000. 
+
+(h) We will now investigate numerically the probability that a boot- strap sample of size n = 100 contains the jth observation. Here j = 4. We repeatedly create bootstrap samples, and each time we record whether or not the fourth observation is contained in the bootstrap sample.
+Comment on the results obtained.
+
+```{r}
+set.seed(1)
+boot2 <- rep(0, 10000)
+for (i in 1:10000) {
+ boot2[i] <- sum(sample(1:100, replace = TRUE) %in% 4) > 0
+}
+mean(boot2)
+
+```
+The probability that a bootstrap sample of size n = 100 contains the jth observation is 0.6417. This is close to the probability that the jth observation is in the bootstrap sample when n = 100, which is 0.6339676587267709.
+
 
 ## ISL Exercise 5.4.9 (20pts)
 
