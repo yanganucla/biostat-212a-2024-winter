@@ -207,9 +207,52 @@ The models obtained from forward and backward selection are not directly connect
 v. True
 The model with (k+1) predictors is derived by choosing from a pool of all potential models with (k+1) predictors, meaning it may not include every predictor chosen for the k-variable model.
 ## ISL Exercise 6.6.3 (10pts)
-
+3. Suppose we estimate the regression coefficients in a linear regression model by minimizing
+0n  0p  2 yi − β0 − βjxij
+subject to
+0p
+|βj| ≤ s
+for a particular value of s. For parts (a) through (e), indicate which
+j=1
+(a) As we increase s from 0, the training RSS will:
+i. Increase initially, and then eventually start decreasing in an
+inverted U shape.
+ii. Decrease initially, and then eventually start increasing in a U shape.
+iii. Steadily increase.
+iv. Steadily decrease.
+v. Remain constant.
+(b) Repeat (a) for test RSS. 
+(c) Repeat (a) for variance.
+(d) Repeat (a) for (squared) bias.
+(e) Repeat (a) for the irreducible error.
+**Answer**
+(a) iii. Steadily increase. As we gradually increase the value of λ from 0, the βj coefficients are increasingly constrained away from their least squares estimates. Consequently, the model's flexibility decreases steadily, leading to a consistent rise in the training RSS (Residual Sum of Squares).
+(b) ii. Decrease initially, and then eventually start increasing in a U shape. As the value of λ increases from 0, the model's flexibility decreases, leading to a decrease in the test RSS. However, as λ continues to increase, the model becomes too inflexible, leading to an increase in the test RSS.
+(c) iii. Steadily increase. As we progressively raise the value of s from 0, we are loosening the constraints on the βj coefficients, allowing them to approach their least squares estimates. Consequently, the model becomes increasingly flexible, leading to a consistent rise in variance. In other words, as s increases, the model gains more freedom to fit the data closely, but this also tends to introduce more variability in its predictions.
+(d) iii. Steadily decrease. As we increment s from 0, we are relaxing the constraints on the βj coefficients, allowing them to approach their least squares estimates. Consequently, the model becomes increasingly flexible, resulting in a gradual reduction in bias. In simpler terms, as s increases, the model gains more freedom to capture the underlying patterns in the data, leading to a decrease in systematic errors or biases in its predictions.
+(e) v. Remain constant. The irreducible error is the error that cannot be reduced by any model, no matter how complex or flexible. As such, it remains constant regardless of the value of s.
 ## ISL Exercise 6.6.4 (10pts)
-
+4. Suppose we estimate the regression coefficients in a linear regression model by minimizing
+0n 0p 2 0p yi−β0− βjxij +λ βj2
+i=1 j=1 j=1
+for a particular value of λ. For parts (a) through (e), indicate which
+of i. through v. is correct. Justify your answer.
+(a) As we increase λ from 0, the training RSS will:
+i. Increase initially, and then eventually start decreasing in an
+inverted U shape.
+ii. Decrease initially, and then eventually start increasing in a U shape.
+iii. Steadily increase.
+iv. Steadily decrease.
+v. Remain constant.
+(b) Repeat (a) for test RSS. (c) Repeat (a) for variance.
+(d) Repeat (a) for (squared) bias.
+(e) Repeat (a) for the irreducible error.
+**Answer**
+(a) iii. Steadily increase. Steadily increase. As we increase λ from 0, we are restricting the βj coefficients more and more (the coefficients will deviate from their least squares estimates), and so the model is becoming less and less flexible which provokes a steady increase in training RSS.
+(b) ii. Decrease initially, and then eventually start increasing in a U shape. As λ increases from 0, the model becomes less flexible, leading to a decrease in test RSS. However, as λ continues to increase, the model becomes too inflexible, leading to an increase in test RSS.
+(c) iii. Steadily decrease. As we elevate λ from 0, we are imposing greater constraints on the βj coefficients, causing them to deviate increasingly from their least squares estimates. Consequently, the model becomes less flexible, leading to a steady decrease in variance. In simpler terms, increasing λ restricts the model's ability to vary widely in response to small changes in the training data, resulting in a more stable and less variable model.
+(d) iii. Steadily decrease. As we increase λ from 0, we are imposing tighter constraints on the βj coefficients, causing them to deviate further from their least squares estimates. Consequently, the model becomes less flexible, leading to a steady increase in bias. In other words, as λ increases, the model's ability to capture complex relationships in the data diminishes, resulting in a systematic underestimation or overestimation of the true relationship between the predictors and the response variable.
+(e) v. Remain constant. The irreducible error is the error that cannot be reduced by any model, no matter how complex or flexible. As such, it remains constant regardless of the value of λ.
 ## ISL Exercise 6.6.5 (10pts)
 
 ## ISL Exercise 6.6.11 (30pts)
