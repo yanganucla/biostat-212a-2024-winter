@@ -254,6 +254,28 @@ v. Remain constant.
 (d) iii. Steadily decrease. As we increase λ from 0, we are imposing tighter constraints on the βj coefficients, causing them to deviate further from their least squares estimates. Consequently, the model becomes less flexible, leading to a steady increase in bias. In other words, as λ increases, the model's ability to capture complex relationships in the data diminishes, resulting in a systematic underestimation or overestimation of the true relationship between the predictors and the response variable.
 (e) v. Remain constant. The irreducible error is the error that cannot be reduced by any model, no matter how complex or flexible. As such, it remains constant regardless of the value of λ.
 ## ISL Exercise 6.6.5 (10pts)
+5. It is well-known that ridge regression tends to give similar coefficient values to correlated variables, whereas the lasso may give quite different coefficient values to correlated variables. We will now explore this property in a very simple setting.
+Suppose that n = 2, p = 2, x11 = x12, x21 = x22. Furthermore, supposethaty1+y2 =0andx11+x21 =0andx12+x22 =0,sothat the estimate for the intercept in a least squares, ridge regression, or lasso model is zero: βˆ0 = 0.
+(a) Write out the ridge regression optimization problem in this setting.
+(b) Argue that in this setting, the ridge coefficient estimates satisfy βˆ 1 = βˆ 2 .
+(c) Write out the lasso optimization problem in this setting.
+(d) Argue that in this setting, the lasso coefficients βˆ1 and βˆ2 are not unique—in other words, there are many possible solutions to the optimization problem in (c). Describe these solutions.
+**Answer**
+(a)for each value of λ, ridge optimization will minimize the quantity 
+(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2+λ(β̂ 1^2+β̂ 2^2).
+(b)For the optimization, we need to take the partial derivative of the above expression with respect to β1 and β2 and evaluate it to 0. Replacing X11=X12=−X21=−X22=a and y1=−y2=b
+the equation reduces to:
+2[b−a(β1+β2)]2+λ(β21+β22)
+Taking partial derivatives with respect to β1 and β2 and setting them to 0, we get:
+2λβ1=4a[b−a(β1+β2)]
+2λβ2=4a[b−a(β1+β2)]
+As the RHS of both the equations are same, we get β1=β2.
+(c)for a given value of λ, lasso optimization will to minimize
+(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2+λ(|β̂ 1|+|β̂ 2|).
+(d)Replacing the values as discussed above, we get the optimization problem:
+We will use the alternate form of the lasso optimization problem
+(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2 subject to |β̂ 1|+|β̂ 2|≤s.
+Geometrically the lasso constraint take the form of a diamond centered at the origin of the plane (β̂ 1,β̂ 2) which intersects the axes at a distances from the origin. By using the setting of this problem (x11=x12=x1, x21=x22=x2, x1+x2=0 and y1+y2=0), we have to minimize the expression2[y1−(β̂ 1+β̂ 2)x1]^2≥0.This optimization problem has a simple solution : β̂ 1+β̂ 2=y1/x1. Geometrically, this is a line parallel to the edge of the diamond of the constraints. Now, solutions to the lasso optimization problem are contours of the function [y1−(β̂ 1+β̂ 2)x1]^2 that intersects the diamond of the constraints. So, the entire edge β̂ 1+β̂ 2=s (as is the edge β̂ 1+β̂ 2=−s) is a potential solution to the lasso optimization problem. Thus, the lasso optimization problem has a whole set of solutions instead of a unique one :{(β̂ 1,β̂ 2):β̂ 1+β̂ 2=s with β̂ 1,β̂ 2≥0 and β̂ 1+β̂ 2=−s with β̂1,β̂2≤0}.
 
 ## ISL Exercise 6.6.11 (30pts)
 
