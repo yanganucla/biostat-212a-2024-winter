@@ -292,17 +292,17 @@ Suppose that n = 2, p = 2, x11 = x12, x21 = x22. Furthermore, supposethaty1+y2 =
 (c) Write out the lasso optimization problem in this setting.
 (d) Argue that in this setting, the lasso coefficients βˆ1 and βˆ2 are not unique—in other words, there are many possible solutions to the optimization problem in (c). Describe these solutions.
 **Answer**
-(a)for each value of λ, ridge optimization will minimize the quantity 
-(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2+λ(β̂ 1^2+β̂ 2^2).
+(a)for each value of λ, ridge optimization will minimize the quantity
+$$(y_1 - \hat{\beta}_1x_1 - \hat{\beta}_2x_1)^2 + (y_2 - \hat{\beta}_1x_2 - \hat{\beta}_2x_2)^2 + \lambda(\hat{\beta}_1^2 + \hat{\beta}_2^2)$$
 (b)For the optimization, we need to take the partial derivative of the above expression with respect to β1 and β2 and evaluate it to 0. Replacing X11=X12=−X21=−X22=a and y1=−y2=b
 the equation reduces to:
-2[b−a(β1+β2)]2+λ(β21+β22)
+2[b−a(β1+β2)]^2+λ(β21+β22)
 Taking partial derivatives with respect to β1 and β2 and setting them to 0, we get:
 2λβ1=4a[b−a(β1+β2)]
 2λβ2=4a[b−a(β1+β2)]
 As the RHS of both the equations are same, we get β1=β2.
 (c)for a given value of λ, lasso optimization will to minimize
-(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2+λ(|β̂ 1|+|β̂ 2|).
+$$(y_1 - \hat{\beta}_1x_1 - \hat{\beta}_2x_1)^2 + (y_2 - \hat{\beta}_1x_2 - \hat{\beta}_2x_2)^2 + \lambda(|\hat{\beta}_1| + |\hat{\beta}_2|)$$
 (d)Replacing the values as discussed above, we get the optimization problem:
 We will use the alternate form of the lasso optimization problem
 (y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2 subject to |β̂ 1|+|β̂ 2|≤s.
