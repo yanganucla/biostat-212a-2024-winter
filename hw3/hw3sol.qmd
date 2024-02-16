@@ -278,7 +278,10 @@ We will use the alternate form of the lasso optimization problem
 Geometrically the lasso constraint take the form of a diamond centered at the origin of the plane (β̂ 1,β̂ 2) which intersects the axes at a distances from the origin. By using the setting of this problem (x11=x12=x1, x21=x22=x2, x1+x2=0 and y1+y2=0), we have to minimize the expression2[y1−(β̂ 1+β̂ 2)x1]^2≥0.This optimization problem has a simple solution : β̂ 1+β̂ 2=y1/x1. Geometrically, this is a line parallel to the edge of the diamond of the constraints. Now, solutions to the lasso optimization problem are contours of the function [y1−(β̂ 1+β̂ 2)x1]^2 that intersects the diamond of the constraints. So, the entire edge β̂ 1+β̂ 2=s (as is the edge β̂ 1+β̂ 2=−s) is a potential solution to the lasso optimization problem. Thus, the lasso optimization problem has a whole set of solutions instead of a unique one :{(β̂ 1,β̂ 2):β̂ 1+β̂ 2=s with β̂ 1,β̂ 2≥0 and β̂ 1+β̂ 2=−s with β̂1,β̂2≤0}.
 
 ## ISL Exercise 6.6.11 (30pts)
-
+11. We will now try to predict per capita crime rate in the Boston data set.
+(a) Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
+(b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross- validation, or some other reasonable alternative, as opposed to using training error.
+(c) Does your chosen model involve all of the features in the data set? Why or why not?
 You must follow the [typical machine learning paradigm](https://ucla-econ-425t.github.io/2023winter/slides/06-modelselection/workflow_lasso.html) to compare _at least_ 3 methods: least squares, lasso, and ridge. Report final results as
 
 | Method | CV RMSE | Test RMSE |
@@ -287,6 +290,147 @@ You must follow the [typical machine learning paradigm](https://ucla-econ-425t.g
 | Ridge | | | |
 | Lasso | | | |
 | ... | | | |
+
+**Answer**
+(a)We will use the Boston dataset to predict per capita crime rate. We will use the following regression methods to predict the per capita crime rate:
+1. Best subset selection
+2. Lasso
+3. Ridge regression
+4. PCR
+We will use the following code to predict the per capita crime rate using the above methods:
+
+```{r}
+str(Boston)
+```
+Best subset Selection
+```{r}
+#Splitting the data into training and testing subsets
+set.seed(5)
+index = sample(nrow(Boston), 0.7*nrow(Boston))
+boston.train<-Boston[index,]
+boston.test<-Boston[-index,]
+```
+
+```{r}
+library(leaps)
+boston.bsm = regsubsets(crim ~ .,data = boston.train, nvmax = 12)
+summary(boston.bsm)
+```
+
+```{r}
+boston.test.mat = model.matrix(crim ~., data = boston.test, 
+                               nvmax = 12)
+val.errors = rep(NA, 12)
+for (i in 1:12) {
+    coefi = coef(boston.bsm, id = i)
+    pred = boston.test.mat[, names(coefi)] %*% coefi
+    val.errors[i] = mean((pred - boston.test$crim)^2)
+}
+ggplot(data.frame(val.errors), aes(x = 1:12, y = val.errors)) +
+    geom_point() +
+    geom_line() +
+    xlab("Number of predictors") +
+    ylab("Test MSE")
+```
+
+```{r}
+which.min(val.errors)
+coef(boston.bsm,which.min(val.errors))
+boston.bsm.MSE = val.errors[4]
+boston.bsm.MSE
+```
+The best subset model adds 1 predictor each time, a model is created, i.e., 1st model consists of 1 most important predictors 2nd model contains two and so on. Among all 12 models, the model that gave least MSE is model with 4 predictors. Thus it is the final model selected via best subset approach.
+
+Ridge Regression
+```{r}
+library(glmnet)
+boston.train.mat=model.matrix(crim~.,boston.train)
+boston.test.mat=model.matrix(crim~.,boston.test)
+grid=10^seq(10,-2,length=100)
+set.seed(5)
+bridge.mod = glmnet(boston.train.mat,boston.train$crim,alpha=0, lambda = grid, thresh=1e-12)
+cv.out=cv.glmnet(boston.train.mat,boston.train$crim,alpha=0, lambda = grid, thresh=1e-12)
+bestlam=cv.out$lambda.min
+bestlam
+```
+
+```{r}
+plot(cv.out)
+```
+
+```{r}
+ridge.model.b<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=bestlam)
+coef(ridge.model.b)
+```
+
+```{r}
+ridge.pred=predict(ridge.model.b,s=bestlam,newx=boston.test.mat)
+ridge.MSE = mean((ridge.pred-boston.test$crim)^2)
+ridge.MSE
+```
+The Ridge regression is performed on range of values of lambda. Lowest MSE of 14.61885 is for the lambda 0.4977
+
+
+Lasso Regression
+```{r}
+lasso.model<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=grid)
+boston.cv.lasso<-cv.glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=grid)
+
+plot(boston.cv.lasso)
+```
+
+```{r}
+boston.bestlam.lasso<-boston.cv.lasso$lambda.min
+boston.bestlam.lasso
+```
+
+```{r}
+lasso.model.b<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=boston.bestlam.lasso)
+coef(lasso.model.b)
+```
+
+```{r}
+boston.pred.newlasso<-predict(lasso.model.b,s=boston.bestlam.lasso,newx=boston.test.mat)
+
+lasso.MSE<-mean((boston.test$crim-boston.pred.newlasso)^2)
+lasso.MSE
+```
+The least MSE is 15.63449 is for lambda 0.1232847 for lasso regression.
+
+PCR
+```{r}
+library(pls)
+boston.pcr.model<-pcr(crim~.,data=boston.train,scale=TRUE,validation="CV")
+summary(boston.pcr.model)
+```
+
+```{r}
+validationplot(boston.pcr.model,val.type="MSEP")
+```
+
+```{r}
+boston.pcr.model$ncomp
+```
+
+```{r}
+boston.pcr.12.model= pcr(crim~.,data=boston.train,scale=TRUE,ncomp=12)
+summary(boston.pcr.12.model)
+```
+
+```{r}
+boston.predict.pcr<-predict(boston.pcr.model,boston.test,ncomp=12)
+pcr.MSE<-mean((boston.test$crim-boston.predict.pcr)^2)
+pcr.MSE
+```
+Comparison of models
+```{r}
+model.names = c("Best subset selection", "Lasso", "Ridge regression", "PCR")
+error.matrix = c(boston.bsm.MSE, lasso.MSE, ridge.MSE, pcr.MSE)
+data.frame(model.names, error.matrix)
+```
+The best model is Ridge regression with least MSE of 14.61885
+(b)Ridge regression model has the least error among all the models tried. It is the best model for predicting crime rate in Boston.
+(c)yes, the ridge regression model comprises of all the features in the data set.
 
 ## Bonus question (20pts)
 
