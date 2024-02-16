@@ -175,7 +175,38 @@ The standard error of μˆ0.1 using the bootstrap is 0.504859. The tenth percent
 ## Least squares is MLE (10pts)
 
 Show that in the case of linear model with Gaussian errors, maximum likelihood and least squares are the same thing, and $C_p$ and AIC are equivalent.
-
+**Answer:**
+Maximum Likelihood Estimation (MLE) and Least Squares Estimation (LSE) Equivalence:
+In a linear model with Gaussian errors, the likelihood function is proportional to the exponential of the negative sum of squared residuals divided by twice the error variance. Since the maximum likelihood estimator seeks to maximize the likelihood function, it is equivalent to minimizing the negative log-likelihood, which is equivalent to minimizing the sum of squared residuals divided by twice the error variance. This minimization process is exactly what least squares estimation does. Therefore, in the case of a linear model with Gaussian errors, maximum likelihood estimation and least squares estimation are equivalent.
+Specificly, we need to demonstrate that maximizing the likelihood is equivalent to minimizing the sum of squared errors.
+Consider a linear model with Gaussian errors:
+$Y = X\beta + \epsilon$
+where $Y$ is the response variable, $X$ is the design matrix, $\beta$ is the vector of coefficients, and $\epsilon$ is a vector of Gaussian errors with mean zero and variance $\sigma^2$.
+The likelihood function for this model is given by:
+$L(\beta, \sigma^2) = \prod_{i=1}^{n} \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - x_i\beta)^2}{2\sigma^2}\right)$
+Taking the logarithm of the likelihood function:
+$\log L(\beta, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(y_i - x_i\beta)^2$
+Maximizing the likelihood is equivalent to maximizing the logarithm of the likelihood, so we can ignore the constant terms and focus on the term $\sum_{i=1}^{n}(y_i - x_i\beta)^2$. This is exactly the sum of squared errors, which is minimized in the least squares approach. Therefore, ML and LS are equivalent in this case.
+Now, let's show that $C_p$ and AIC are equivalent.
+Cp is defined as:
+$$C_p = \frac{1}{n}(RSS + 2d\hat{\sigma}^2)$$
+AIC is defined as:
+$$\text{AIC} = -  2 \log L + 2d$$
+AIC is also defined as:
+$$AIC = \frac{1}{n\hat{\sigma}^2}(RSS + 2d\hat{\sigma}^2)$$
+Where RSS is the residual sum of squares, d is the number of predictors, and $\hat{\sigma}^2$ is the estimate of the variance of the error $\epsilon$.
+In addition, $C_p$ is a criterion used for model selection that measures the quality of a model by taking into account the sum of squared errors and the number of parameters in the model. It is defined as:
+$C_p = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \frac{2d\hat{\sigma}^2}{n}$
+where $n$ is the number of observations, $\hat{y}_i$ is the predicted value, $d$ is the number of parameters in the model, and $\hat{\sigma}^2$ is an estimate of the error variance.
+AIC (Akaike Information Criterion) is another criterion used for model selection that also takes into account the sum of squared errors and the number of parameters. It is defined as:
+$AIC = -2\log L(\hat{\beta}, \hat{\sigma}^2) + 2d$
+where $\hat{\beta}$ and $\hat{\sigma}^2$ are the maximum likelihood estimates of the coefficients and error variance.
+To show that $C_p$ and AIC are equivalent, we need to demonstrate that minimizing $C_p$ is equivalent to minimizing $AIC$.
+Using the equivalence between maximum likelihood and least squares, we can rewrite the AIC as:
+$AIC = -2\log L(\hat{\beta}, \hat{\sigma}^2) + 2d = \frac{n}{\hat{\sigma}^2}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \frac{2d\hat{\sigma}^2}{n} + 2d$
+The first term in the above equation is proportional to the sum of squared errors, and the second term is proportional to the $C_p$ criterion. The third term is a constant, and the fourth term is proportional to the number of parameters.
+Since minimizing the sum of squared errors is equivalent to minimizing the $C_p$ criterion, and the fourth term is a constant, minimizing $C_p$ is equivalent to minimizing $AIC$.
+Therefore, $C_p$ and AIC are equivalent in this case.
 
 ## ISL Exercise 6.6.1 (10pts)
 1. We perform best subset, forward stepwise, and backward stepwise selection on a single data set. For each approach, we obtain p + 1 models, containing 0, 1, 2, . . . , p predictors. Explain your answers:
