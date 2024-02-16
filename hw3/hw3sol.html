@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yang An and UID:106332601">
-<meta name="dcterms.date" content="2024-02-15">
+<meta name="dcterms.date" content="2024-02-16">
 
 <title>Biostat 212A Homework 3</title>
 <style>
@@ -3170,7 +3170,7 @@ return!"\t\n\x0B\f\r                　\u2028\u2029
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 15, 2024</p>
+      <p class="date">February 16, 2024</p>
     </div>
   </div>
   
@@ -3879,7 +3879,26 @@ crim     40.3     41.35     42.51     44.15</code></pre>
 <h2 data-number="6" class="anchored" data-anchor-id="bonus-question-20pts"><span class="header-section-number">6</span> Bonus question (20pts)</h2>
 <p>Consider a linear regression, fit by least squares to a set of training data <span class="math inline">\((x_1, y_1), \ldots, (x_N, y_N)\)</span> drawn at random from a population. Let <span class="math inline">\(\hat \beta\)</span> be the least squares estimate. Suppose we have some test data <span class="math inline">\((\tilde{x}_1, \tilde{y}_1), \ldots, (\tilde{x}_M, \tilde{y}_M)\)</span> drawn at random from the same population as the training data. If <span class="math inline">\(R_{\text{train}}(\beta) = \frac{1}{N} \sum_{i=1}^N (y_i - \beta^T x_i)^2\)</span> and <span class="math inline">\(R_{\text{test}}(\beta) = \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \beta^T \tilde{x}_i)^2\)</span>. Show that <span class="math display">\[
 \operatorname{E}[R_{\text{train}}(\hat{\beta})] &lt; \operatorname{E}[R_{\text{test}}(\hat{\beta})].
+\]</span> <strong>Answer:</strong> The least squares estimate 𝛽̂ is the solution of <span class="math display">\[
+\hat{\beta} = \arg \min_{\beta} \frac{1}{N} \sum_{i=1}^N (y_i - \beta^T x_i)^2
+\]</span> The expected value of the training error is <span class="math display">\[
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right]
+\]</span> The expected value of the test error is <span class="math display">\[
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right]
+\]</span> The expected value of the training error is less than the expected value of the test error. <span class="math display">\[
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] &lt; \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+\]</span> This is because the training error is calculated using the same data that was used to fit the model. The model is fit to minimize the training error. The test error is calculated using new data that was not used to fit the model. The model is not fit to minimize the test error. The model is fit to minimize the training error. The expected value of the training error is less than the expected value of the test error. More specific additions： <span class="math display">\[
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right] = \frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2]
+\]</span> <span class="math display">\[
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right] = \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+\]</span> <span class="math display">\[
+\operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] &lt; \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
 \]</span></p>
+<p><span class="math display">\[
+\frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] &lt; \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+\]</span> <span class="math display">\[
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] &lt; \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+\]</span> The expected value of the training error is less than the expected value of the test error.</p>
 </section>
 
 </main>

@@ -438,3 +438,39 @@ Consider a linear regression, fit by least squares to a set of training data $(x
 $$
 \operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})].
 $$
+**Answer:**
+The least squares estimate 𝛽̂ is the solution of
+$$
+\hat{\beta} = \arg \min_{\beta} \frac{1}{N} \sum_{i=1}^N (y_i - \beta^T x_i)^2
+$$
+The expected value of the training error is
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right]
+$$
+The expected value of the test error is
+$$
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right]
+$$
+The expected value of the training error is less than the expected value of the test error.
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+$$
+This is because the training error is calculated using the same data that was used to fit the model. The model is fit to minimize the training error. The test error is calculated using new data that was not used to fit the model. The model is not fit to minimize the test error. The model is fit to minimize the training error. The expected value of the training error is less than the expected value of the test error.
+More specific additions：
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right] = \frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2]
+$$
+$$
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right] = \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+$$
+\operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] < \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+
+$$
+\frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] < \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+$$
+The expected value of the training error is less than the expected value of the test error.
