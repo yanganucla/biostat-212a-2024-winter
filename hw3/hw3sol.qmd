@@ -1,7 +1,7 @@
 ---
 title: "Biostat 212A Homework 3"
 subtitle: "Due Feb 20, 2024 @ 11:59PM"
-author: "YOUR NAME and UID"
+author: "Yang An and UID:106332601"
 date: today
 format:
   html:
@@ -23,23 +23,297 @@ knitr:
 ---
 
 ## ISL Exercise 5.4.2 (10pts)
+2. We will now derive the probability that a given observation is part of a bootstrap sample. Suppose that we obtain a bootstrap sample from a set of n observations.
+(a) What is the probability that the first bootstrap observation is not the jth observation from the original sample? 
+
+The probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n. This is because the probability of the first bootstrap observation being the jth observation from the original sample is 1/n. Therefore, the probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n.
+
+
+(b) What is the probability that the second bootstrap observation is not the jth observation from the original sample?
+
+The probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n. This is because the probability of the second bootstrap observation being the jth observation from the original sample is 1/n. Therefore, the probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n.
+
+(c) Argue that the probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n.
+
+The probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n. This is because the probability that the first bootstrap observation is not the jth observation from the original sample is 1 - 1/n. The probability that the second bootstrap observation is not the jth observation from the original sample is 1 - 1/n. Therefore, the probability that the jth observation is not in the bootstrap sample is (1 − 1/n)^n.
+
+(d) When n = 5, what is the probability that the jth observation is in the bootstrap sample?
+
+When n = 5, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/5)^5 = 0.67232.
+
+(e) When n = 100, what is the probability that the jth observation is in the bootstrap sample?
+
+When n = 100, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/100)^100 = 0.6339676587267709.
+
+(f) When n = 10, 000, what is the probability that the jth observa- tion is in the bootstrap sample?
+
+When n = 10, 000, the probability that the jth observation is in the bootstrap sample is 1-(1 − 1/10,000)^10,000 = 0.6321.
+
+(g) Create a plot that displays, for each integer value of n from 1 to 100,000, the probability that the jth observation is in the bootstrap sample. Comment on what you observe.
+
+```{r}
+library(ggplot2)
+boot1 <- data.frame(n = 1:100000)
+boot1$prob <- 1 - (1 - 1/boot1$n)^boot1$n
+ggplot(data = boot1, aes(x = n, y = prob)) +
+  geom_line() +
+  labs(title = "Probability that the jth observation is in the bootstrap sample",
+       x = "n",
+       y = "Probability") +
+  theme_bw() +
+  theme(text = element_text(size = 8))
+
+```
+The plot shows that the probability that the jth observation is in the bootstrap sample decreases as n increases. The probability that the jth observation is in the bootstrap sample is 1 when n = 1, and it decreases to 0.6321 when n = 10,000. 
+
+(h) We will now investigate numerically the probability that a boot- strap sample of size n = 100 contains the jth observation. Here j = 4. We repeatedly create bootstrap samples, and each time we record whether or not the fourth observation is contained in the bootstrap sample.
+Comment on the results obtained.
+
+```{r}
+set.seed(1)
+boot2 <- rep(0, 10000)
+for (i in 1:10000) {
+ boot2[i] <- sum(sample(1:100, replace = TRUE) %in% 4) > 0
+}
+mean(boot2)
+
+```
+The probability that a bootstrap sample of size n = 100 contains the jth observation is 0.6417. This is close to the probability that the jth observation is in the bootstrap sample when n = 100, which is 0.6339676587267709.
+
 
 ## ISL Exercise 5.4.9 (20pts)
+9. We will now consider the Boston housing data set, from the ISLR2 library.
+(a) Based on this data set, provide an estimate for the population mean of medv. Call this estimate μˆ.
+```{r}
+library(ISLR2)
+mean.fn <- function(data, index) {
+   X <- data$medv[index]
+   medvmean = mean(X)
+   return(medvmean)
+}
+dim(Boston)
+mean.fn(Boston, 1:506)
+```
+
+The estimate for the population mean of medv is 22.53281.
+
+(b) Provide an estimate of the standard error of μˆ. Interpret this result.
+Hint: We can compute the standard error of the sample mean by dividing the sample standard deviation by the square root of the number of observations.
+```{r}
+se.fn <- function(data, index) {
+   X <- data$medv[index]
+   medvse = sd(X)/sqrt(length(X))
+   return(medvse)
+}
+dim(Boston)
+se.fn(Boston, 1:506)
+```
+The estimate of the standard error of μˆ is 0.4088611. This means that the sample mean of medv is 0.4088611 away from the population mean of medv.
+
+(c) Now estimate the standard error of μˆ using the bootstrap. How does this compare to your answer from (b)?
+```{r}
+library(boot)
+library(ISLR2)
+set.seed(2)
+boot.fn <- function(data, index) {
+    m <- mean(data$medv[index])
+    return (m)
+}
+boot(Boston, boot.fn, 1000)
+
+```
+The standard error of μˆ using the bootstrap is 0.407299. This is close to the standard error of μˆ obtained in (b), which is 0.4088611.
+
+
+(d) Based on your bootstrap estimate from (c), provide a 95 % con- fidence interval for the mean of medv. Compare it to the results obtained using t.test(Boston$medv).
+Hint: You can approximate a 95 % confidence interval using the formula [μˆ − 2SE(μˆ), μˆ + 2SE(μˆ)].
+```{r}
+t.test(Boston$medv)
+CI.m <- c(22.53 - 2*0.407299, 22.53 + 2*0.407299)
+CI.m
+```
+The 95% confidence interval for the mean of medv using the bootstrap is [21.7154, 23.3446]. The 95% confidence interval for the mean of medv using t.test(Boston$medv) is [21.72953, 23.33608]. The two confidence intervals are very close and the bond of bootstrap is little larger than t test.
+
+(e) Based on this data set, provide an estimate, μˆmed, for the median value of medv in the population.
+```{r}
+median.fn <- function(data, index) {
+   X <- data$medv[index]
+   medvmedian = median(X)
+   return(medvmedian)
+}
+dim(Boston)
+median.fn(Boston, 1:506)
+```
+(f) Wenowwouldliketoestimatethestandarderrorofμˆmed.Unfortunately, there is no simple formula for computing the standard error of the median. Instead, estimate the standard error of the median using the bootstrap. Comment on your findings.
+```{r}
+set.seed(3)
+boot.fn <- function(data, index) {
+    m <- median(data$medv[index])
+    return (m)
+}
+boot(Boston, boot.fn, 1000)
+```
+The standard error of μˆmed using the bootstrap is 0.3651739.  The median of medv is the same of e, which is 21.2.
+
+(g) Based on this data set, provide an estimate for the tenth per- centile of medv in Boston census tracts. Call this quantity μˆ0.1. (You can use the quantile() function.)
+```{r}
+quantile(Boston$medv, 0.1)
+```
+The estimate for the tenth percentile of medv in Boston census tracts is 12.75.
+
+(h) Use the bootstrap to estimate the standard error of μˆ0.1. Com- ment on your findings.
+```{r}
+set.seed(4)
+boot.fn <- function(data, index) {
+    q <- quantile(data$medv[index], 0.1)
+    return (q)
+}
+boot(Boston, boot.fn, 1000)
+```
+The standard error of μˆ0.1 using the bootstrap is 0.504859. The tenth percentile of medv is 12.75, which is equal to g.
+
 
 ## Least squares is MLE (10pts)
 
 Show that in the case of linear model with Gaussian errors, maximum likelihood and least squares are the same thing, and $C_p$ and AIC are equivalent.
+**Answer:**
+Maximum Likelihood Estimation (MLE) and Least Squares Estimation (LSE) Equivalence:
+In a linear model with Gaussian errors, the likelihood function is proportional to the exponential of the negative sum of squared residuals divided by twice the error variance. Since the maximum likelihood estimator seeks to maximize the likelihood function, it is equivalent to minimizing the negative log-likelihood, which is equivalent to minimizing the sum of squared residuals divided by twice the error variance. This minimization process is exactly what least squares estimation does. Therefore, in the case of a linear model with Gaussian errors, maximum likelihood estimation and least squares estimation are equivalent.
+Specificly, we need to demonstrate that maximizing the likelihood is equivalent to minimizing the sum of squared errors.
+Consider a linear model with Gaussian errors:
+$Y = X\beta + \epsilon$
+where $Y$ is the response variable, $X$ is the design matrix, $\beta$ is the vector of coefficients, and $\epsilon$ is a vector of Gaussian errors with mean zero and variance $\sigma^2$.
+The likelihood function for this model is given by:
+$L(\beta, \sigma^2) = \prod_{i=1}^{n} \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - x_i\beta)^2}{2\sigma^2}\right)$
+Taking the logarithm of the likelihood function:
+$\log L(\beta, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(y_i - x_i\beta)^2$
+Maximizing the likelihood is equivalent to maximizing the logarithm of the likelihood, so we can ignore the constant terms and focus on the term $\sum_{i=1}^{n}(y_i - x_i\beta)^2$. This is exactly the sum of squared errors, which is minimized in the least squares approach. Therefore, ML and LS are equivalent in this case.
+Now, let's show that $C_p$ and AIC are equivalent.
+Cp is defined as:
+$$C_p = \frac{1}{n}(RSS + 2d\hat{\sigma}^2)$$
+AIC is defined as:
+$$\text{AIC} = -  2 \log L + 2d$$
+AIC is also defined as:
+$$AIC = \frac{1}{n\hat{\sigma}^2}(RSS + 2d\hat{\sigma}^2)$$
+Where RSS is the residual sum of squares, d is the number of predictors, and $\hat{\sigma}^2$ is the estimate of the variance of the error $\epsilon$.
+In addition, $C_p$ is a criterion used for model selection that measures the quality of a model by taking into account the sum of squared errors and the number of parameters in the model. It is defined as:
+$C_p = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \frac{2d\hat{\sigma}^2}{n}$
+where $n$ is the number of observations, $\hat{y}_i$ is the predicted value, $d$ is the number of parameters in the model, and $\hat{\sigma}^2$ is an estimate of the error variance.
+AIC (Akaike Information Criterion) is another criterion used for model selection that also takes into account the sum of squared errors and the number of parameters. It is defined as:
+$AIC = -2\log L(\hat{\beta}, \hat{\sigma}^2) + 2d$
+where $\hat{\beta}$ and $\hat{\sigma}^2$ are the maximum likelihood estimates of the coefficients and error variance.
+To show that $C_p$ and AIC are equivalent, we need to demonstrate that minimizing $C_p$ is equivalent to minimizing $AIC$.
+Using the equivalence between maximum likelihood and least squares, we can rewrite the AIC as:
+$AIC = -2\log L(\hat{\beta}, \hat{\sigma}^2) + 2d = \frac{n}{\hat{\sigma}^2}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \frac{2d\hat{\sigma}^2}{n} + 2d$
+The first term in the above equation is proportional to the sum of squared errors, and the second term is proportional to the $C_p$ criterion. The third term is a constant, and the fourth term is proportional to the number of parameters.
+Since minimizing the sum of squared errors is equivalent to minimizing the $C_p$ criterion, and the fourth term is a constant, minimizing $C_p$ is equivalent to minimizing $AIC$.
+Therefore, $C_p$ and AIC are equivalent in this case.
 
 ## ISL Exercise 6.6.1 (10pts)
+1. We perform best subset, forward stepwise, and backward stepwise selection on a single data set. For each approach, we obtain p + 1 models, containing 0, 1, 2, . . . , p predictors. Explain your answers:
+(a) Which of the three models with k predictors has the smallest training RSS?
 
+The best subset selection has the smallest training RSS because it considers all possible models with k predictors and selects the best one. Both forward and backward
+selection determine models that depend on which predictors they pick first as they iterate
+toward the kth model, meaning that a poor choice early on cannot be undone.
+
+(b) Which of the three models with k predictors has the smallest test RSS?
+
+The best subset selection has the smallest test RSS because it takes into account more models than the other methods
+
+(c) True or False:
+i. The predictors in the k-variable model identified by forward stepwise are a subset of the predictors in the (k+1)-variable model identified by forward stepwise selection.
+ii. The predictors in the k-variable model identified by back- ward stepwise are a subset of the predictors in the (k + 1)- variable model identified by backward stepwise selection.
+iii. The predictors in the k-variable model identified by back- ward stepwise are a subset of the predictors in the (k + 1)- variable model identified by forward stepwise selection.
+iv. The predictors in the k-variable model identified by forward stepwise are a subset of the predictors in the (k+1)-variable model identified by backward stepwise selection.
+v. The predictors in the k-variable model identified by best subset are a subset of the predictors in the (k + 1)-variable model identified by best subset selection.
+
+i. True. 
+Adding one additional predictor to the model with k predictors results in the model with (k+1) predictors.
+ii. True, 
+One predictor is removed from the model with (k+1) predictors to obtain the model with k predictors.
+iii. False
+The models obtained from forward and backward selection are not directly connected or interlinked.
+iv. False
+The models obtained from forward and backward selection are not directly connected or interlinked.
+v. True
+The model with (k+1) predictors is derived by choosing from a pool of all potential models with (k+1) predictors, meaning it may not include every predictor chosen for the k-variable model.
 ## ISL Exercise 6.6.3 (10pts)
-
+3. Suppose we estimate the regression coefficients in a linear regression model by minimizing
+0n  0p  2 yi − β0 − βjxij
+subject to
+0p
+|βj| ≤ s
+for a particular value of s. For parts (a) through (e), indicate which
+j=1
+(a) As we increase s from 0, the training RSS will:
+i. Increase initially, and then eventually start decreasing in an
+inverted U shape.
+ii. Decrease initially, and then eventually start increasing in a U shape.
+iii. Steadily increase.
+iv. Steadily decrease.
+v. Remain constant.
+(b) Repeat (a) for test RSS. 
+(c) Repeat (a) for variance.
+(d) Repeat (a) for (squared) bias.
+(e) Repeat (a) for the irreducible error.
+**Answer**
+ (a)Steadily increase. As we gradually increase the value of λ from 0, the βj coefficients are increasingly constrained away from their least squares estimates. Consequently, the model's flexibility decreases steadily, leading to a consistent rise in the training RSS (Residual Sum of Squares).
+ (b) Decrease initially, and then eventually start increasing in a U shape. As the value of λ increases from 0, the model's flexibility decreases, leading to a decrease in the test RSS. However, as λ continues to increase, the model becomes too inflexible, leading to an increase in the test RSS.
+ (c)Steadily increase. As we progressively raise the value of s from 0, we are loosening the constraints on the βj coefficients, allowing them to approach their least squares estimates. Consequently, the model becomes increasingly flexible, leading to a consistent rise in variance. In other words, as s increases, the model gains more freedom to fit the data closely, but this also tends to introduce more variability in its predictions.
+ (d)Steadily decrease. As we increment s from 0, we are relaxing the constraints on the βj coefficients, allowing them to approach their least squares estimates. Consequently, the model becomes increasingly flexible, resulting in a gradual reduction in bias. In simpler terms, as s increases, the model gains more freedom to capture the underlying patterns in the data, leading to a decrease in systematic errors or biases in its predictions.
+ (e)Remain constant. The irreducible error is the error that cannot be reduced by any model, no matter how complex or flexible. As such, it remains constant regardless of the value of s.
 ## ISL Exercise 6.6.4 (10pts)
-
+4. Suppose we estimate the regression coefficients in a linear regression model by minimizing
+0n 0p 2 0p yi−β0− βjxij +λ βj2
+i=1 j=1 j=1
+for a particular value of λ. For parts (a) through (e), indicate which
+of i. through v. is correct. Justify your answer.
+(a) As we increase λ from 0, the training RSS will:
+i. Increase initially, and then eventually start decreasing in an
+inverted U shape.
+ii. Decrease initially, and then eventually start increasing in a U shape.
+iii. Steadily increase.
+iv. Steadily decrease.
+v. Remain constant.
+(b) Repeat (a) for test RSS. (c) Repeat (a) for variance.
+(d) Repeat (a) for (squared) bias.
+(e) Repeat (a) for the irreducible error.
+**Answer**
+(a) iii. Steadily increase. Steadily increase. As we increase λ from 0, we are restricting the βj coefficients more and more (the coefficients will deviate from their least squares estimates), and so the model is becoming less and less flexible which provokes a steady increase in training RSS.
+(b) ii. Decrease initially, and then eventually start increasing in a U shape. As λ increases from 0, the model becomes less flexible, leading to a decrease in test RSS. However, as λ continues to increase, the model becomes too inflexible, leading to an increase in test RSS.
+(c) iii. Steadily decrease. As we elevate λ from 0, we are imposing greater constraints on the βj coefficients, causing them to deviate increasingly from their least squares estimates. Consequently, the model becomes less flexible, leading to a steady decrease in variance. In simpler terms, increasing λ restricts the model's ability to vary widely in response to small changes in the training data, resulting in a more stable and less variable model.
+(d) iii. Steadily decrease. As we increase λ from 0, we are imposing tighter constraints on the βj coefficients, causing them to deviate further from their least squares estimates. Consequently, the model becomes less flexible, leading to a steady increase in bias. In other words, as λ increases, the model's ability to capture complex relationships in the data diminishes, resulting in a systematic underestimation or overestimation of the true relationship between the predictors and the response variable.
+(e) v. Remain constant. The irreducible error is the error that cannot be reduced by any model, no matter how complex or flexible. As such, it remains constant regardless of the value of λ.
 ## ISL Exercise 6.6.5 (10pts)
+5. It is well-known that ridge regression tends to give similar coefficient values to correlated variables, whereas the lasso may give quite different coefficient values to correlated variables. We will now explore this property in a very simple setting.
+Suppose that n = 2, p = 2, x11 = x12, x21 = x22. Furthermore, supposethaty1+y2 =0andx11+x21 =0andx12+x22 =0,sothat the estimate for the intercept in a least squares, ridge regression, or lasso model is zero: βˆ0 = 0.
+(a) Write out the ridge regression optimization problem in this setting.
+(b) Argue that in this setting, the ridge coefficient estimates satisfy βˆ 1 = βˆ 2 .
+(c) Write out the lasso optimization problem in this setting.
+(d) Argue that in this setting, the lasso coefficients βˆ1 and βˆ2 are not unique—in other words, there are many possible solutions to the optimization problem in (c). Describe these solutions.
+**Answer**
+(a)for each value of λ, ridge optimization will minimize the quantity
+$$(y_1 - \hat{\beta}_1x_1 - \hat{\beta}_2x_1)^2 + (y_2 - \hat{\beta}_1x_2 - \hat{\beta}_2x_2)^2 + \lambda(\hat{\beta}_1^2 + \hat{\beta}_2^2)$$
+(b)For the optimization, we need to take the partial derivative of the above expression with respect to β1 and β2 and evaluate it to 0. Replacing X11=X12=−X21=−X22=a and y1=−y2=b
+the equation reduces to:
+2[b−a(β1+β2)]^2+λ(β21+β22)
+Taking partial derivatives with respect to β1 and β2 and setting them to 0, we get:
+2λβ1=4a[b−a(β1+β2)]
+2λβ2=4a[b−a(β1+β2)]
+As the RHS of both the equations are same, we get β1=β2.
+(c)for a given value of λ, lasso optimization will to minimize
+$$(y_1 - \hat{\beta}_1x_1 - \hat{\beta}_2x_1)^2 + (y_2 - \hat{\beta}_1x_2 - \hat{\beta}_2x_2)^2 + \lambda(|\hat{\beta}_1| + |\hat{\beta}_2|)$$
+(d)Replacing the values as discussed above, we get the optimization problem:
+We will use the alternate form of the lasso optimization problem
+(y1−β̂ 1x1−β̂ 2x1)^2+(y2−β̂ 1x2−β̂ 2x2)^2 subject to |β̂ 1|+|β̂ 2|≤s.
+Geometrically the lasso constraint take the form of a diamond centered at the origin of the plane (β̂ 1,β̂ 2) which intersects the axes at a distances from the origin. By using the setting of this problem (x11=x12=x1, x21=x22=x2, x1+x2=0 and y1+y2=0), we have to minimize the expression2[y1−(β̂ 1+β̂ 2)x1]^2≥0.This optimization problem has a simple solution : β̂ 1+β̂ 2=y1/x1. Geometrically, this is a line parallel to the edge of the diamond of the constraints. Now, solutions to the lasso optimization problem are contours of the function [y1−(β̂ 1+β̂ 2)x1]^2 that intersects the diamond of the constraints. So, the entire edge β̂ 1+β̂ 2=s (as is the edge β̂ 1+β̂ 2=−s) is a potential solution to the lasso optimization problem. Thus, the lasso optimization problem has a whole set of solutions instead of a unique one :{(β̂ 1,β̂ 2):β̂ 1+β̂ 2=s with β̂ 1,β̂ 2≥0 and β̂ 1+β̂ 2=−s with β̂1,β̂2≤0}.
 
 ## ISL Exercise 6.6.11 (30pts)
-
+11. We will now try to predict per capita crime rate in the Boston data set.
+(a) Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
+(b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross- validation, or some other reasonable alternative, as opposed to using training error.
+(c) Does your chosen model involve all of the features in the data set? Why or why not?
 You must follow the [typical machine learning paradigm](https://ucla-econ-425t.github.io/2023winter/slides/06-modelselection/workflow_lasso.html) to compare _at least_ 3 methods: least squares, lasso, and ridge. Report final results as
 
 | Method | CV RMSE | Test RMSE |
@@ -49,9 +323,186 @@ You must follow the [typical machine learning paradigm](https://ucla-econ-425t.g
 | Lasso | | | |
 | ... | | | |
 
+**Answer**
+(a)We will use the Boston dataset to predict per capita crime rate. We will use the following regression methods to predict the per capita crime rate:
+1. Best subset selection
+2. Lasso
+3. Ridge regression
+4. PCR
+We will use the following code to predict the per capita crime rate using the above methods:
+
+```{r}
+str(Boston)
+```
+Best subset Selection
+```{r}
+#Splitting the data into training and testing subsets
+set.seed(5)
+index = sample(nrow(Boston), 0.7*nrow(Boston))
+boston.train<-Boston[index,]
+boston.test<-Boston[-index,]
+```
+
+```{r}
+library(leaps)
+boston.bsm = regsubsets(crim ~ .,data = boston.train, nvmax = 12)
+summary(boston.bsm)
+```
+
+```{r}
+boston.test.mat = model.matrix(crim ~., data = boston.test, 
+                               nvmax = 12)
+val.errors = rep(NA, 12)
+for (i in 1:12) {
+    coefi = coef(boston.bsm, id = i)
+    pred = boston.test.mat[, names(coefi)] %*% coefi
+    val.errors[i] = mean((pred - boston.test$crim)^2)
+}
+ggplot(data.frame(val.errors), aes(x = 1:12, y = val.errors)) +
+    geom_point() +
+    geom_line() +
+    xlab("Number of predictors") +
+    ylab("Test MSE")
+```
+
+```{r}
+which.min(val.errors)
+coef(boston.bsm,which.min(val.errors))
+boston.bsm.MSE = val.errors[4]
+boston.bsm.MSE
+```
+The best subset model adds 1 predictor each time, a model is created, i.e., 1st model consists of 1 most important predictors 2nd model contains two and so on. Among all 12 models, the model that gave least MSE is model with 4 predictors. Thus it is the final model selected via best subset approach.
+
+Ridge Regression
+```{r}
+library(glmnet)
+boston.train.mat=model.matrix(crim~.,boston.train)
+boston.test.mat=model.matrix(crim~.,boston.test)
+grid=10^seq(10,-2,length=100)
+set.seed(5)
+bridge.mod = glmnet(boston.train.mat,boston.train$crim,alpha=0, lambda = grid, thresh=1e-12)
+cv.out=cv.glmnet(boston.train.mat,boston.train$crim,alpha=0, lambda = grid, thresh=1e-12)
+bestlam=cv.out$lambda.min
+bestlam
+```
+
+```{r}
+plot(cv.out)
+```
+
+```{r}
+ridge.model.b<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=bestlam)
+coef(ridge.model.b)
+```
+
+```{r}
+ridge.pred=predict(ridge.model.b,s=bestlam,newx=boston.test.mat)
+ridge.MSE = mean((ridge.pred-boston.test$crim)^2)
+ridge.MSE
+```
+The Ridge regression is performed on range of values of lambda. Lowest MSE of 14.61885 is for the lambda 0.4977
+
+
+Lasso Regression
+```{r}
+lasso.model<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=grid)
+boston.cv.lasso<-cv.glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=grid)
+
+plot(boston.cv.lasso)
+```
+
+```{r}
+boston.bestlam.lasso<-boston.cv.lasso$lambda.min
+boston.bestlam.lasso
+```
+
+```{r}
+lasso.model.b<-glmnet(boston.train.mat,boston.train$crim,alpha=0,lambda=boston.bestlam.lasso)
+coef(lasso.model.b)
+```
+
+```{r}
+boston.pred.newlasso<-predict(lasso.model.b,s=boston.bestlam.lasso,newx=boston.test.mat)
+
+lasso.MSE<-mean((boston.test$crim-boston.pred.newlasso)^2)
+lasso.MSE
+```
+The least MSE is 15.63449 is for lambda 0.1232847 for lasso regression.
+
+PCR
+```{r}
+library(pls)
+boston.pcr.model<-pcr(crim~.,data=boston.train,scale=TRUE,validation="CV")
+summary(boston.pcr.model)
+```
+
+```{r}
+validationplot(boston.pcr.model,val.type="MSEP")
+```
+
+```{r}
+boston.pcr.model$ncomp
+```
+
+```{r}
+boston.pcr.12.model= pcr(crim~.,data=boston.train,scale=TRUE,ncomp=12)
+summary(boston.pcr.12.model)
+```
+
+```{r}
+boston.predict.pcr<-predict(boston.pcr.model,boston.test,ncomp=12)
+pcr.MSE<-mean((boston.test$crim-boston.predict.pcr)^2)
+pcr.MSE
+```
+Comparison of models
+```{r}
+model.names = c("Best subset selection", "Lasso", "Ridge regression", "PCR")
+error.matrix = c(boston.bsm.MSE, lasso.MSE, ridge.MSE, pcr.MSE)
+data.frame(model.names, error.matrix)
+```
+The best model is Ridge regression with least MSE of 14.61885
+(b)Ridge regression model has the least error among all the models tried. It is the best model for predicting crime rate in Boston.
+(c)yes, the ridge regression model comprises of all the features in the data set.
+
 ## Bonus question (20pts)
 
 Consider a linear regression, fit by least squares to a set of training data $(x_1, y_1), \ldots, (x_N,  y_N)$ drawn at random from a population. Let $\hat \beta$ be the least squares estimate. Suppose we have some test data $(\tilde{x}_1, \tilde{y}_1), \ldots, (\tilde{x}_M, \tilde{y}_M)$ drawn at random from the same population as the training data. If $R_{\text{train}}(\beta) = \frac{1}{N} \sum_{i=1}^N (y_i - \beta^T x_i)^2$ and $R_{\text{test}}(\beta) = \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \beta^T \tilde{x}_i)^2$. Show that
 $$
 \operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})].
 $$
+**Answer:**
+The least squares estimate 𝛽̂ is the solution of
+$$
+\hat{\beta} = \arg \min_{\beta} \frac{1}{N} \sum_{i=1}^N (y_i - \beta^T x_i)^2
+$$
+The expected value of the training error is
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right]
+$$
+The expected value of the test error is
+$$
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right]
+$$
+The expected value of the training error is less than the expected value of the test error.
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+$$
+This is because the training error is calculated using the same data that was used to fit the model. The model is fit to minimize the training error. The test error is calculated using new data that was not used to fit the model. The model is not fit to minimize the test error. The model is fit to minimize the training error. The expected value of the training error is less than the expected value of the test error.
+More specific additions：
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{N} \sum_{i=1}^N (y_i - \hat{\beta}^T x_i)^2 \right] = \frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2]
+$$
+$$
+\operatorname{E}[R_{\text{test}}(\hat{\beta})] = \operatorname{E} \left[ \frac{1}{M} \sum_{i=1}^M (\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2 \right] = \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+$$
+\operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] < \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+
+$$
+\frac{1}{N} \sum_{i=1}^N \operatorname{E}[(y_i - \hat{\beta}^T x_i)^2] < \frac{1}{M} \sum_{i=1}^M \operatorname{E}[(\tilde{y}_i - \hat{\beta}^T \tilde{x}_i)^2]
+$$
+$$
+\operatorname{E}[R_{\text{train}}(\hat{\beta})] < \operatorname{E}[R_{\text{test}}(\hat{\beta})]
+$$
+The expected value of the training error is less than the expected value of the test error.
