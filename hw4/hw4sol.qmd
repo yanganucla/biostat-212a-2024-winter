@@ -32,14 +32,75 @@ p2 <- 1 - p1
 gini <- 2 * p1 * p2
 class.error <- 1 - pmax(p1, p2)
 entropy <- -pmax(p1, p2) * log2(pmax(p1, p2)) - pmin(p1, p2) * log2(pmin(p1, p2))
-par(mfrow = c(1, 3))
-matplot(p1, cbind(gini, class.error, entropy), ylab = "Gini index, Classification error, Entropy", col = c("green", "blue", "orange"))
+matplot(p1, cbind(gini, class.error, entropy), ylab = "Gini index, Classification error, Entropy", type = "l", col = c("green", "blue", "orange"))
+legend("topright",legend=c("Gini index","Class.error", "Entropy"),pch=20,col=c("green", "blue", "orange"))
 ```
 
 
+
+
 ## ISL Exercise 8.4.4 (10pts)
+X2 < 1 |
+15
+5
+3
+0
+10
+X2 1 0
+01 X1
+X1 < 0
+X1 < 1
+X2 < 2
+0.21
+2.49
+-1.80
+0.63
+-1.06
+FIGURE 8.14. Left: A partition of the predictor space corresponding to Exer- cise 4a. Right: A tree corresponding to Exercise 4b.
+This question relates to the plots in Figure 8.14.
+(a) Sketch the tree corresponding to the partition of the predictor space illustrated in the left-hand panel of Figure 8.14. The num- bers inside the boxes indicate the mean of Y within each region.
+If X1≥1 then 5, else if X2≥1 then 15, else if X1<0 then 3, else if X2<0 then 10, else 0.
+
+```{r}
+library(knitr)
+include_graphics("/Users/yangan/Desktop/212A/212a-hw/hw4/8.4.4(a).jpg")
+```
+(b) Create a diagram similar to the left-hand panel of Figure 8.14, using the tree illustrated in the right-hand panel of the same figure. You should divide up the predictor space into the correct regions, and indicate the mean for each region.
+
+```{r}
+# (b)
+par(xpd = NA)
+plot(NA, NA, type = "n", xlim = c(-2, 2), ylim = c(-3, 3), xlab = "X1", ylab = "X2")
+# X2 < 1
+lines(x = c(-2, 2), y = c(1, 1))
+# X1 < 1 with X2 < 1
+lines(x = c(1, 1), y = c(-3, 1))
+text(x = (-2 + 1)/2, y = -1, labels = c(-1.8))
+text(x = 1.5, y = -1, labels = c(0.63))
+# X2 < 2 with X2 >= 1
+lines(x = c(-2, 2), y = c(2, 2))
+text(x = 0, y = 2.5, labels = c(2.49))
+# X1 < 0 with X2<2 and X2>=1
+lines(x = c(0, 0), y = c(1, 2))
+text(x = -1, y = 1.5, labels = c(-1.06))
+text(x = 1, y = 1.5, labels = c(0.21))
+```
+
 
 ## ISL Exercise 8.4.5 (10pts)
+5. Suppose we produce ten bootstrapped samples from a data set containing red and green classes. We then apply a classification tree to each bootstrapped sample and, for a specific value of X, produce 10 estimates of P(Class is Red|X):
+0.1,0.15,0.2,0.2,0.55,0.6,0.6,0.65,0.7, and0.75.
+There are two common ways to combine these results together into a single class prediction. One is the majority vote approach discussed in this chapter. The second approach is to classify based on the average probability. In this example, what is the final classification under each of these two approaches?
+
+```{r}
+# Majority vote
+p <- c(0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7, 0.75)
+mean(p >= 0.5)
+# Average probability
+mean(p)
+```
+
+
 
 ## ISL Lab 8.3. `Boston` data set (30pts)
 
