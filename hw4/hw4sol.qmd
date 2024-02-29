@@ -40,22 +40,6 @@ legend("topright",legend=c("Gini index","Class.error", "Entropy"),pch=20,col=c("
 
 
 ## ISL Exercise 8.4.4 (10pts)
-X2 < 1 |
-15
-5
-3
-0
-10
-X2 1 0
-01 X1
-X1 < 0
-X1 < 1
-X2 < 2
-0.21
-2.49
--1.80
-0.63
--1.06
 FIGURE 8.14. Left: A partition of the predictor space corresponding to Exer- cise 4a. Right: A tree corresponding to Exercise 4b.
 This question relates to the plots in Figure 8.14.
 (a) Sketch the tree corresponding to the partition of the predictor space illustrated in the left-hand panel of Figure 8.14. The num- bers inside the boxes indicate the mean of Y within each region.
@@ -105,8 +89,342 @@ In this case, the most common prediction is 0.6, which occurs twice. With the ma
 ## ISL Lab 8.3. `Boston` data set (30pts)
 
 Follow the machine learning workflow to train regression tree, random forest, and boosting methods for predicting `medv`. Evaluate out-of-sample performance on a test set.
+```{r}
+rm(list = ls())
+```
 
-## ISL Lab 8.3 `Carseats` data set (30pts)
+
+```{r}
+library(GGally)
+library(gtsummary)
+library(ranger)
+library(tidyverse)
+library(tidymodels)
+library(ISLR2)
+library(MASS)
+library(tidymodels)
+library(rpart)
+library(rpart.plot)
+library(vip)
+library(randomForest)
+library(gbm)
+library(xgboost)
+```
+
+```{r}
+# Load the Boston data set
+data(Boston)
+head(Boston)
+```
+
+```{r}
+Boston %>% tbl_summary()
+```
+
+```{r}
+Boston <- Boston %>% filter(!is.na(medv))
+```
+
+```{r}
+# Split the data into training and test sets
+set.seed(203)
+data_split <- initial_split(Boston, prop = 0.5)
+Bonston_train <- training(data_split)
+Bonston_test <- testing(data_split)
+```
+
+```{r}
+tree_recipe <- 
+  recipe(
+    medv ~ ., 
+    data = Bonston_train
+  ) %>%
+  # # create traditional dummy variables (not necessary for random forest in R)
+  # step_dummy(all_nominal()) %>%
+  step_naomit(medv) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  #  center and scale numeric data
+  step_log(medv) %>%
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric()) %>%
+  # step_normalize(all_numeric_predictors()) %>%
+  # estimate the means and standard deviations
+  prep(training = Bonston_train, retain = TRUE)
+tree_recipe
+```
+
+```{r}
+tree_recipe_spec <- 
+  recipe(
+    medv ~ ., 
+    data = Bonston_train
+  ) %>%
+  # # create traditional dummy variables (not necessary for random forest in R)
+  # step_dummy(all_nominal()) %>%
+  step_naomit(medv) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>%
+ #  center and scale numeric data
+  step_log(medv) %>%
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric()) 
+
+tree_recipe_spec
+```
+
+```{r}
+# regression tree model
+regtree_mod <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = 5,
+  mode = "regression",
+  engine = "rpart"
+)
+
+# random forest model
+rf_mod <- rand_forest(
+  mode = "regression",
+  engine = "randomForest",
+  trees = 500,
+  mtry = tune()
+)
+
+# boosting model
+boost_mod <- boost_tree(
+  mode = "regression",
+  engine = "xgboost",
+  trees = 500,
+  mtry = tune(),
+  learn_rate = tune()
+)
+```
+
+```{r}
+# regression tree model
+tree_wf <- workflow() %>%
+  add_recipe(tree_recipe_spec) %>%
+  add_model(regtree_mod)
+
+# random forest model
+rf_wf <- workflow() %>%
+  add_recipe(tree_recipe_spec) %>%
+  add_model(rf_mod)
+
+# boosting model
+boost_wf <- workflow() %>%
+  add_recipe(tree_recipe_spec) %>%
+  add_model(boost_mod)
+```
+
+```{r}
+# grid for regression tree model
+tree_grid <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  levels = c(100, 5)
+)
+
+# grid for random forest model
+rf_grid <- grid_regular(
+  mtry(range = c(2, ncol(Bonston_train) - 1)),
+  levels = 5
+)
+
+# grid for boosting model
+boost_grid <- grid_regular(
+  mtry(range = c(2, ncol(Bonston_train) - 1)),
+  learn_rate(range = c(0.01, 0.1)),
+  levels = 5
+)
+```
+
+```{r}
+#### R Set cross-validation partitions.
+set.seed(203)
+
+folds <- vfold_cv(Bonston_train, v = 5)
+folds
+# cv for regression tree model
+tree_fit <- tree_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = tree_grid,
+    metrics = metric_set(rmse, rsq)
+  )
+
+# cv for random forest model
+rf_fit <- rf_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = rf_grid,
+    metrics = metric_set(rmse, rsq)
+  )
+
+# cv for boosting model
+boost_fit <- boost_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = boost_grid,
+    metrics = metric_set(rmse, rsq)
+  )
+
+```
+
+Visualize CV results:
+```{r}
+tree_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rmse") %>%
+  mutate(tree_depth = as.factor(tree_depth)) %>%
+  ggplot(mapping = aes(x = cost_complexity, y = mean, color = tree_depth)) +
+  geom_point() + 
+  geom_line() + 
+  labs(x = "cost_complexity", y = "CV mse")
+
+rf_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rmse") %>%
+  ggplot(mapping = aes(x = mtry, y = mean)) +
+  geom_point() + 
+  geom_line() + 
+  labs(x = "mtry", y = "CV mse")
+
+boost_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rmse") %>%
+  ggplot(mapping = aes(x = mtry, y = mean, color = learn_rate)) +
+  geom_point() + 
+  geom_line() + 
+  labs(x = "mtry", y = "CV mse")
+```
+
+
+```{r}
+tree_fit %>%
+  show_best("rmse")
+
+rf_fit %>%
+  show_best("rmse")
+
+boost_fit %>%
+  show_best("rmse")
+```
+
+
+Let's select the best model.
+```{r}
+best_tree <- tree_fit %>%
+  select_best("rmse")
+best_tree
+
+best_rf <- rf_fit %>%
+  select_best("rmse")
+best_rf
+
+best_boost <- boost_fit %>%
+  select_best("rmse")
+best_boost
+```
+```{r}
+# Final workflow
+final_wftree <- tree_wf %>%
+  finalize_workflow(best_tree)
+final_wftree
+
+final_wfrf <- rf_wf %>%
+  finalize_workflow(best_rf)
+final_wfrf
+
+final_wfboost <- boost_wf %>%
+  finalize_workflow(best_boost)
+final_wfboost
+```
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fittree <- 
+  final_wftree %>%
+  last_fit(data_split)
+final_fittree
+
+final_fitrf <- 
+  final_wfrf %>%
+  last_fit(data_split)
+final_fitrf
+
+final_fitboost <- 
+  final_wfboost %>%
+  last_fit(data_split)
+final_fitboost
+```
+
+
+```{r}
+# Test metrics
+final_fittree %>% 
+  collect_metrics()
+
+final_fitrf %>%
+  collect_metrics()
+
+final_fitboost %>%
+  collect_metrics()
+```
+
+```{r}
+# Visualize the final model
+library(rpart.plot)
+library(randomForest)
+library(xgboost)
+library(data.table)
+final_tree <- extract_workflow(final_fittree)
+final_tree
+
+final_tree %>%
+  extract_fit_engine() %>%
+  rpart.plot(roundint = FALSE)
+
+final_rf <- extract_workflow(final_fitrf)
+final_rf
+
+final_rf %>%
+  extract_fit_engine() %>%
+  randomForest::varImpPlot()
+
+final_boost <- extract_workflow(final_fitboost)
+final_boost
+
+boost_model <- final_boost$fit$fit$fit
+importance <- xgb.importance(model = boost_model)
+importance_df <- as.data.table(importance)
+xgboost::xgb.plot.importance(importance_matrix = importance_df)
+```
+
+
+
+
+```{r}
+library(vip)
+
+final_tree %>% 
+  extract_fit_parsnip() %>% 
+  vip()
+
+final_rf %>%
+  extract_fit_parsnip() %>%
+  vip()
+
+final_boost %>%
+  extract_fit_parsnip() %>%
+  vip()
+
+
+```
+
 
 Follow the machine learning workflow to train classification tree, random forest, and boosting methods for classifying `Sales <= 8` versus `Sales > 8`. Evaluate out-of-sample performance on a test set.
 
