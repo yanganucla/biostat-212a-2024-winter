@@ -667,4 +667,30 @@ Let
 $$
 f(X) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p = \beta_0 + \beta^T X. 
 $$
-Then $f(X)=0$ defines a hyperplane in $\mathbb{R}^p$. Show that $f(x)$ is proportional to the signed distance of a point $x$ to the hyperplane $f(X) = 0$. 
+Then $f(X)=0$ defines a hyperplane in $\mathbb{R}^p$. Show that $f(x)$ is proportional to the signed distance of a point $x$ to the hyperplane $f(X) = 0$.
+**Answer**
+To show that `f(x)` is proportional to the signed distance of a point `x` to the hyperplane `f(X) = 0`, we need to express the signed distance between the point `x` and the hyperplane in terms of `f(x)`.
+The signed distance `d(x)` of a point `x` to the hyperplane `f(X) = 0` is given by the projection of the vector `x` onto the unit normal vector `\beta`, which is perpendicular to the hyperplane. Then, the signed distance is given by:
+$$
+d(x) = \frac{{\beta^T x}}{{|\beta|}}
+$$
+
+Now, we need to relate `d(x)` to `f(x)`. The equation of the hyperplane is `f(X) = \beta_0 + \beta^T X`, and when `f(X) = 0`, it defines the hyperplane. So, if we plug in `X = x` into `f(X)`, we get:
+
+$$
+f(x) = \beta_0 + \beta^T x
+$$
+
+Now, we'll rewrite this equation to express `\beta^T x` in terms of `f(x)`:
+
+$$
+\beta^T x = f(x) - \beta_0
+$$
+
+Now, substitute this expression for `\beta^T x` into the formula for `d(x)`:
+
+$$
+d(x) = \frac{{f(x) - \beta_0}}{{|\beta|}}
+$$
+
+This shows that the signed distance `d(x)` is proportional to `f(x) - \beta_0`. So, `f(x)` is proportional to the signed distance of the point `x` to the hyperplane `f(X) = 0`.
