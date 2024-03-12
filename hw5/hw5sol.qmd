@@ -1,0 +1,696 @@
+---
+title: "Biostat 212a Homework 5"
+subtitle: "Due Mar 11, 2024 @ 11:59PM"
+author: "Yang An and UID:106332601"
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+engine: knitr
+knitr:
+  opts_chunk: 
+    fig.align: 'center'
+    # fig.width: 6
+    # fig.height: 4
+    message: FALSE
+    cache: false
+---
+
+## ISL Exercise 9.7.1 (10pts)
+1. This problem involves hyperplanes in two dimensions.
+(a) Sketch the hyperplane 1 + 3X1 − X2 = 0. Indicate the set of points for 
+which 1+3X1 −X2 > 0, as well as the set of points for which 1 + 3X1 − X2 < 0.
+(b) On the same plot, sketch the hyperplane −2 + X1 + 2X2 = 0. Indicate the 
+set of points for which −2 + X1 + 2X2 > 0, as well as the set of points for
+which−2+X1+2X2 <0.
+**Answer**
+（a)
+Plotting the line: 1+3X1−X2=0⟺X2=3X1+1
+Rearranging for X2 makes it clear which side of the hyperplane is which:
+1+3X1−X2<0⟺X2>1+3X1
+1+3X1−X2>0⟺X2<1+3X1
+```{r}
+library(ggplot2)
+library(dplyr)
+library(latex2exp)
+
+X1 <- -10:10
+X2 <- 3*X1 + 1
+
+df1 <- data.frame(X1, X2, line = "a")
+
+grid <- expand.grid(X1 = seq(min(df1$X1), max(df1$X1), length.out = 150), 
+                    X2 = seq(min(df1$X2), max(df1$X2), length.out = 150)) %>%
+  mutate(region = case_when(1 + 3*X1 - X2 < 0 ~ "lt 0", 
+                            1 + 3*X1 - X2 > 0 ~ "gt 0"))
+
+ggplot(grid, aes(x = X1, y = X2)) + 
+  geom_tile(aes(fill = region), alpha = 0.5) + 
+  geom_line(data = df1, aes(x = X1, y = X2), size = 1, col = "purple") + 
+  annotate("text", x = -5, y = 10, 
+           label = TeX("$1 + 3X_1 - X_2 < 0$", output = "character"),
+           hjust = 0.5, size = 4, parse = TRUE, col = "black") + 
+  annotate("text", x = 5, y = -10, 
+           label = TeX("$1 + 3X_1 - X_2 > 0$", output = "character"),
+           hjust = 0.5, size = 4, parse = TRUE, col = "black") + 
+  scale_fill_manual(values = c("blue", "green")) +
+  scale_x_continuous(expand = c(0.01,0.01), breaks = seq(-10, 10, 2)) +
+  scale_y_continuous(expand = c(0.01,0.01), breaks = seq(-30, 30, 10)) +
+  theme(legend.position = "none") + 
+  labs(title = TeX(r'(Hyperplane Plot: $1 + 3X_1 - X_2 = 0$)'), 
+       x = TeX(r'($X_1$)'), 
+       y = TeX(r'($X_2$)'))
+
+
+```
+（b)
+Plotting the line: −2+X1+2X2=0⟺X2=−X1/2+1
+Rearranging for X2 makes it clear which side of the hyperplane is which:
+−2+X1+2X2<0⟺X2<−X1/2+1
+−2+X1+2X2>0⟺X2>−X1/2+1
+```{r}
+library(ggplot2)
+library(dplyr)
+library(latex2exp)
+X1 <- -10:10
+X2 <- 1 - 0.5*X1
+
+df2 <- data.frame(X1, X2, line = "b")
+
+grid <- grid %>%
+  mutate(region = case_when(-2 + X1 + 2*X2 < 0 ~ "lt 0", 
+                            -2 + X1 + 2*X2 > 0 ~ "gt 0"))
+
+ggplot(grid, aes(x = X1, y = X2)) + 
+  geom_tile(aes(fill = region), alpha = 0.5) + 
+  geom_line(data = df2, aes(x = X1, y = X2), size = 1, col = "purple") + 
+  annotate("text", x = 2.5, y = 15, 
+           label = TeX("$-2 + X_1 + 2X_2 > 0$", output = "character"),
+           hjust = 0.5, size = 4, parse = TRUE, col = "black") + 
+  annotate("text", x = -2.5, y = -15, 
+           label = TeX("$-2 + X_1 + 2X_2 < 0$", output = "character"),
+           hjust = 0.5, size = 4, parse = TRUE, col = "black") + 
+  scale_fill_manual(values = c("blue", "green")) +
+  scale_x_continuous(expand = c(0.01,0.01), breaks = seq(-10, 10, 2)) +
+  scale_y_continuous(expand = c(0.01,0.01), breaks = seq(-30, 30, 10)) +
+  theme(legend.position = "none") + 
+  labs(title = TeX("Hyperplane Plot: $-2 + X_1 + 2X_2 = 0$"), 
+       x = TeX("($X_1$)"), 
+       y = TeX("($X_2$)"))
+
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(latex2exp)
+bind_rows(df1, df2) %>%
+  ggplot(aes(x = X1, y = X2, col = line)) + 
+  geom_line(size = 1) + 
+  scale_color_manual(values = c("green", "blue"), 
+                     labels = unname(TeX(c("$1 + 3X_1 - X_2 = 0", "$-2 + X_1 + 2*X_2 = 0$")))) + 
+  scale_x_continuous(breaks = seq(-10, 10, 2)) +
+  scale_y_continuous(breaks = seq(-30, 30, 10)) +
+  labs(x = TeX(r'($X_1$)'), 
+       y = TeX(r'($X_2$)'), 
+       col = "Hyperplane:") + 
+  theme(legend.position = "bottom")
+```
+## ISL Exercise 9.7.2 (10pts)
+2. We have seen that in p = 2 dimensions, a linear decision boundary takes the 
+form β0 +β1X1 +β2X2 = 0. We now investigate a non-linear decision boundary.
+(a) Sketch the curve
+(1+X1)2 +(2−X2)2 =4.
+(b) On your sketch, indicate the set of points for which
+(1+X1)2 +(2−X2)2 >4, as well as the set of points for which
+(1+X1)2 +(2−X2)2 ≤4.
+(c) Suppose that a classifier assigns an observation to the blue class
+if
+and to the red class otherwise. To what class is the observation
+(1+X1)2 +(2−X2)2 >4, (0, 0) classified? (−1, 1)? (2, 2)? (3, 8)?
+(d) Argue that while the decision boundary in (c) is not linear in terms of X1
+and X2, it is linear in terms of X1, X12, X2, and X2 .
+
+**Answer**
+(a)
+the curve is a circle with center (−1,2) and radius 2
+(1+X1)^2+(2−X2)^2=4
+(X1−(−1))^2+((−1)(X2−2))^2=4
+(X1−(−1))^2+(X2−2)^2=2^2
+```{r}
+library(ggplot2)
+
+# Define the circle's data
+create_circle <- function(x_center, y_center, radius, n_points = 100) {
+  t <- seq(0, 2 * pi, length.out = n_points)
+  x <- x_center + radius * cos(t)
+  y <- y_center + radius * sin(t)
+  data.frame(x, y)
+}
+circle_data <- data.frame(X1 = -1, X2 = 2, r = 2)
+
+# Create ggplot object
+ggplot() + 
+   geom_point(data = create_circle(-1, 2, 2), aes(x, y), 
+             color = "mediumseagreen", size = 1) + 
+  scale_x_continuous(expand = c(0.01, 0.01), limits = c(-3.5, 1.5)) +
+  scale_y_continuous(expand = c(0.01, 0.01), limits = c(-0.5, 4.5)) +
+  labs(
+    title = TeX(r'(Curve Plot: $(1 + X_1)^2 + (2 - X_2)^2 = 4$)'),
+    x = TeX(r'($X_1$)'),
+    y = TeX(r'($X_2$)')
+  ) +
+  coord_fixed()
+
+```
+(b)
+The set of points for which (1+X1)2 +(2−X2)2 >4 is the set of points outside the circle, and the set of points for which (1+X1)2 +(2−X2)2 ≤4 is the set of points inside the circle. 
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Define custom function to create a circle
+create_circle <- function(x_center, y_center, radius, n_points = 100) {
+  t <- seq(0, 2 * pi, length.out = n_points)
+  x <- x_center + radius * cos(t)
+  y <- y_center + radius * sin(t)
+  data.frame(x, y)
+}
+
+# Generate grid data
+grid <- expand.grid(X1 = seq(-3.5, 1.5, length.out = 200), 
+                    X2 = seq(-0.5, 4.5, length.out = 200)) %>%
+  mutate(region = ifelse((1 + X1)^2 + (2 - X2)^2 > 4, "gt 4", "le 4"))
+
+# Create ggplot object
+ggplot() + 
+  geom_tile(data = grid, aes(x = X1, y = X2, fill = region), alpha = 0.5) + 
+  geom_point(data = create_circle(-1, 2, 2), aes(x, y), 
+             color = "mediumseagreen", size = 1) + 
+  annotate("text", x = -1, y = 2, 
+           label = TeX("$(1 + X_1)^2 + (2 - X_2)^2 \\leq 4$"), 
+           hjust = 0.5, size = 4, parse = TRUE, col = "red") + 
+  annotate("text", x = 0.5, y = 0, 
+           label = TeX("$(1 + X_1)^2 + (2 - X_2)^2 > 4$"), 
+           hjust = 0.5 , size = 2, parse = TRUE, col = "blue") + 
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(-3.5, 1.5)) + 
+  scale_y_continuous(expand = c(0.01,0.01), limits = c(-0.5, 4.5)) + 
+  scale_fill_manual(values = c("#00BFC4", "#F8766D")) +
+  theme(legend.position = "none") + 
+  labs(title = TeX(r'(Curve Plot: $(1 + X_1)^2 + (2 - X_2)^2 = 4$)'), 
+       x = TeX(r'($X_1$)'), 
+       y = TeX(r'($X_2$)')) + 
+  coord_fixed()
+
+```
+(c)
+The observation (1+X1)2 +(2−X2)2 >4, (0, 0) is classified as blue, (−1, 1) is 
+classified as red, (2, 2) is classified as blue, and (3, 8) is classified as 
+blue.
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Define custom function to create a circle
+create_circle <- function(x_center, y_center, radius, n_points = 100) {
+  t <- seq(0, 2 * pi, length.out = n_points)
+  x <- x_center + radius * cos(t)
+  y <- y_center + radius * sin(t)
+  data.frame(x, y)
+}
+
+# Define data for new observations
+new_obs <- data.frame(X1 = c(0, -1, 2, 3), X2 = c(0, 1, 2, 8)) %>%
+  mutate(region = ifelse((1 + X1)^2 + (2 - X2)^2 > 4, "gt 4", "le 4"))
+
+# Generate grid data
+grid <- expand.grid(X1 = seq(-3.5, 3.5, length.out = 200), 
+                    X2 = seq(-0.5, 8.5, length.out = 200)) %>%
+  mutate(region = ifelse((1 + X1)^2 + (2 - X2)^2 > 4, "gt 4", "le 4"))
+
+# Create ggplot object
+ggplot() + 
+  geom_tile(data = grid, aes(x = X1, y = X2, fill = region), alpha = 0.5) + 
+  geom_path(data = create_circle(-1, 2, 2), aes(x, y),
+            col = "mediumseagreen", size = 1) + 
+  geom_point(data = new_obs, aes(x = X1, y = X2, col = region)) + 
+  scale_x_continuous(expand = c(0.01,0.01), limits = c(-3.5, 3.5)) + 
+  scale_y_continuous(expand = c(0.01,0.01), limits = c(-0.5, 8.5)) + 
+  scale_fill_manual(values = c("#00BFC4", "#F8766D")) +
+  scale_color_manual(values = c("blue", "red")) +
+  theme(legend.position = "none") + 
+  labs(title = TeX(r'(Classifier Plot: $f(X) = (1 + X_1)^2 + (2 - X_2)^2 - 4$)'
+                   ), 
+       x = TeX(r'($X_1$)'), 
+       y = TeX(r'($X_2$)')) + 
+  coord_fixed()
+
+```
+(d)
+
+The decision boundary is defined as the boundary where the function f(X) changes 
+its sign. In this case, f(X)=0 represents the boundary because it's where the 
+prediction changes.
+$$\begin{align*}
+f(X) & \Rightarrow f(X) = 0 \\
+& = (1 + X_1)^2 + (2 - X_2)^2 - 4 \\
+& = X_1^2 + 2X_1 + 1 + X_2^2 - 4X_2 + 4 - 4 \\
+& = X_1^2 + X_2^2 + 2X_1 - 4X_2 + 1 \\
+& = (1)(X_1^2) + (1)(X_2^2) + (2)(X_1) + (-4)(X_2) + 1 = 0
+\end{align*}$$
+From the final form we can see how f(X)=0 is expressed in the form a1Z1+a2Z2+
+a3Z3+a4Z4+b=0 for (Z1,Z2,Z3,Z4)=(X21,X22,X1,X2), and therefore it is linear 
+in terms of x1, x1^2, x2, and x2^2. Thus, the decision boundary is a circle in 
+the feature space. 
+
+## Support vector machines (SVMs) on the `Carseats` data set (30pts)
+
+Follow the machine learning workflow to train support vector classifier (same 
+as SVM with linear kernel), SVM with polynomial kernel (tune the degree and 
+regularization parameter $C$), and SVM with radial kernel (tune the scale 
+parameter $\gamma$ and regularization parameter $C$) for classifying `Sales<=8` 
+versus `Sales>8`. Use the same seed as in your HW4 for the initial test/train 
+split and compare the final test AUC and accuracy to those methods you tried 
+in HW4.
+
+### Machine Learning Workflow: SVM with Polynomial Kernel (Carseats Data)
+
+```{r}  
+sessionInfo()
+```
+
+```{r}
+# Load necessary libraries
+library(GGally)
+library(gtsummary)
+library(ranger)
+library(tidyverse)
+library(tidymodels)
+library(ISLR2)
+
+# Load the dataset
+Sales <- ISLR2::Carseats %>%
+  mutate(Sales = ifelse(Sales <= 8, "Low", "High")) 
+  # Check the structure of the dataset
+glimpse(Sales)
+```
+
+```{r}
+# Numerical summaries stratified by the outcome `Sales`.
+Sales %>% tbl_summary(by = Sales)
+```
+
+```{r}
+# Graphical summary:
+ Sales %>% ggpairs()
+```
+
+```{r}
+# For reproducibility
+set.seed(203)
+
+data_split <- initial_split(
+  Sales, 
+  # stratify by AHD
+  strata = "Sales", 
+  prop = 0.75
+  )
+data_split
+```
+
+```{r}
+Sales_other <- training(data_split)
+dim(Sales_other)
+```
+
+```{r}
+Sales_test <- testing(data_split)
+dim(Sales_test)
+```
+
+```{r}
+svm_recipe <- 
+  recipe(
+    Sales ~ ., 
+    data = Sales_other
+  ) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors())
+svm_recipe
+```
+
+```{r}
+svm_mod <- 
+  svm_poly(
+    mode = "classification",
+    cost = tune(),
+    degree = tune(),
+    # scale_factor = tune()
+  ) %>% 
+  set_engine("kernlab")
+svm_mod
+```
+
+```{r}
+svm_wf <- workflow() %>%
+  add_recipe(svm_recipe) %>%
+  add_model(svm_mod)
+svm_wf
+```
+
+```{r}
+param_grid <- grid_regular(
+  cost(range = c(-3, 2)),
+  degree(range = c(1, 5)),
+  #scale_factor(range = c(-1, 1)),
+  levels = c(5)
+  )
+param_grid
+```
+
+```{r}
+set.seed(203)
+
+folds <- vfold_cv(Sales_other, v = 5)
+folds
+```
+
+```{r}
+svm_fit <- svm_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = param_grid,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+svm_fit
+```
+
+```{r}
+svm_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "roc_auc" ) %>%
+  ggplot(mapping = aes(x = degree, y = mean)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Cost", y = "CV AUC") +
+  scale_x_log10()
+```
+
+
+```{r}
+svm_fit %>%
+  show_best("roc_auc")
+```
+
+
+```{r}
+best_svm <- svm_fit %>%
+  select_best("roc_auc")
+best_svm
+```
+
+```{r}
+# Final workflow
+final_wf <- svm_wf %>%
+  finalize_workflow(best_svm)
+final_wf
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit <- 
+  final_wf %>%
+  last_fit(data_split)
+final_fit
+```
+
+```{r}
+# Test metrics
+final_fit %>% 
+  collect_metrics()
+```
+
+```{r}
+install.packages("doParallel", repos = "https://cloud.r-project.org/")
+library(doParallel)
+
+set.seed(101)
+split_obj <- initial_split(data = Sales, prop = 0.7, strata = Sales)
+train <- training(split_obj)
+test <- testing(split_obj)
+
+
+# Create the recipe
+recipe(Sales ~ ., data = train) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors()) %>%
+  # estimate the means and standard deviations
+  prep() -> recipe_obj
+
+# Bake
+train <- bake(recipe_obj, new_data=train)
+test <- bake(recipe_obj, new_data=test)
+```
+
+```{r}
+library(vip)
+final_fit %>% 
+  pluck(".workflow", 1) %>%   
+  pull_workflow_fit() %>% 
+  # vip(method = "permute", train= Sales)
+  vip(method = "permute", 
+      target = "Sales", metric = "accuracy",
+      pred_wrapper = kernlab::predict, train = train)
+```
+
+```{r}
+# Check for missing values in the training data
+any_missing <- any(is.na(train))
+any_missing
+```
+
+
+```{r}
+svm_rbf_spec <- svm_rbf() %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_rbf_fit <- svm_rbf_spec %>%
+  fit(Sales ~ ., data = train[, c('Price', 'Age', 'Sales')])
+
+svm_rbf_fit %>%
+  extract_fit_engine() %>%
+  plot()
+```
+
+### Machine Learning Workflow: SVM with RBF Kernel (Carseats Data))
+```{r}
+sessionInfo()
+```
+
+```{r}
+# Load libraries
+library(GGally)
+library(gtsummary)
+library(kernlab)
+library(tidyverse)
+library(tidymodels)
+library(ISLR2)
+
+# Load the dataset
+Carsets <- ISLR2::Carseats %>%
+  mutate(Sales = ifelse(Sales <= 8, "Low", "High")) 
+  # Check the structure of the dataset
+glimpse(Carsets)
+```
+
+```{r}
+# Numerical summaries stratified by the outcome `Sales`.
+Carsets %>% tbl_summary(by = Sales)
+```
+
+```{r}
+# Graphical summary:
+Carsets %>% ggpairs()
+```
+
+```{r}
+# For reproducibility
+set.seed(203)
+
+data_split2 <- initial_split(
+  Carsets, 
+  # stratify by Sales
+  strata = "Sales", 
+  prop = 0.75
+  )
+data_split2
+```
+
+```{r}
+Carsets_other <- training(data_split2)
+dim(Carsets_other)
+```
+
+```{r}
+Carsets_test <- testing(data_split2)
+dim(Carsets_test)
+```
+
+```{r}
+svm_recipe2 <- 
+  recipe(
+    Sales ~ ., 
+    data = Carsets_other
+  ) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors())
+svm_recipe2
+```
+
+```{r}
+svm_mod2 <- 
+  svm_rbf(
+    mode = "classification",
+    cost = tune(),
+    rbf_sigma = tune()
+  ) %>% 
+  set_engine("kernlab")
+svm_mod2
+```
+
+```{r}
+svm_wf2 <- workflow() %>%
+  add_recipe(svm_recipe2) %>%
+  add_model(svm_mod2)
+svm_wf2
+```
+
+```{r}
+param_grid2 <- grid_regular(
+  cost(range = c(-8, 5)),
+  rbf_sigma(range = c(-5, -3)),
+  levels = c(14, 5)
+  )
+param_grid2
+```
+
+```{r}
+set.seed(203)
+
+folds2 <- vfold_cv(Carsets_other, v = 5)
+folds2
+```
+
+
+```{r}
+svm_fit2 <- svm_wf2 %>%
+  tune_grid(
+    resamples = folds2,
+    grid = param_grid2,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+svm_fit2
+```
+
+```{r}
+svm_fit2 %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "roc_auc") %>%
+  ggplot(mapping = aes(x = cost, y = mean, alpha = rbf_sigma)) +
+  geom_point() +
+  geom_line(aes(group = rbf_sigma)) +
+  labs(x = "Cost", y = "CV AUC") +
+  scale_x_log10()
+```
+
+```{r}
+svm_fit2 %>%
+  show_best("roc_auc")
+```
+
+```{r}
+best_svm2 <- svm_fit2 %>%
+  select_best("roc_auc")
+best_svm2
+```
+
+```{r}
+# Final workflow
+final_wf2 <- svm_wf2 %>%
+  finalize_workflow(best_svm2)
+final_wf2
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit2 <- 
+  final_wf2 %>%
+  last_fit(data_split2)
+final_fit2
+```
+
+```{r}
+# Test metrics
+final_fit2 %>% 
+  collect_metrics()
+```
+Comparing these metrics:
+AUC Comparison:
+The AUC for the current method (0.9479124) is higher than that of the classification tree (0.85), random forest (0.91), and boosting methods (0.92) used in HW4. This indicates that the current method has better discrimination ability in distinguishing between the positive and negative classes compared to the methods used in HW4.
+Accuracy Comparison:
+The accuracy of the current method (0.84) is lower than that of random forest (0.88) and slightly lower than the boosting methods (0.87) used in HW4, but it's higher than that of the classification tree (0.82) used in HW4.
+Based on these comparisons, the current method seems to outperform the methods used in HW4 in terms of AUC, but its accuracy is slightly lower than random forest and boosting methods while being higher than the classification tree. However, the choice of the best method depends on various factors such as the specific requirements of the application, interpretability, computational complexity, etc.
+
+## Bonus (10pts)
+
+Let
+$$
+f(X) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p = \beta_0 + \beta^T X. 
+$$
+Then $f(X)=0$ defines a hyperplane in $\mathbb{R}^p$. Show that $f(x)$ is proportional to the signed distance of a point $x$ to the hyperplane $f(X) = 0$.
+**Answer**
+To show that `f(x)` is proportional to the signed distance of a point `x` to the hyperplane `f(X) = 0`, we need to express the signed distance between the point `x` and the hyperplane in terms of `f(x)`.
+The signed distance `d(x)` of a point `x` to the hyperplane `f(X) = 0` is given by the projection of the vector `x` onto the unit normal vector `\beta`, which is perpendicular to the hyperplane. Then, the signed distance is given by:
+$$
+d(x) = \frac{{\beta^T x}}{{|\beta|}}
+$$
+
+Now, we need to relate `d(x)` to `f(x)`. The equation of the hyperplane is `f(X) = \beta_0 + \beta^T X`, and when `f(X) = 0`, it defines the hyperplane. So, if we plug in `X = x` into `f(X)`, we get:
+
+$$
+f(x) = \beta_0 + \beta^T x
+$$
+
+Now, we'll rewrite this equation to express `\beta^T x` in terms of `f(x)`:
+
+$$
+\beta^T x = f(x) - \beta_0
+$$
+
+Now, substitute this expression for `\beta^T x` into the formula for `d(x)`:
+
+$$
+d(x) = \frac{{f(x) - \beta_0}}{{|\beta|}}
+$$
+
+This shows that the signed distance `d(x)` is proportional to `f(x) - \beta_0`. So, `f(x)` is proportional to the signed distance of the point `x` to the hyperplane `f(X) = 0`.
