@@ -278,6 +278,389 @@ versus `Sales>8`. Use the same seed as in your HW4 for the initial test/train
 split and compare the final test AUC and accuracy to those methods you tried 
 in HW4.
 
+### Machine Learning Workflow: SVM with Polynomial Kernel (Carseats Data)
+
+```{r}  
+sessionInfo()
+```
+
+```{r}
+# Load necessary libraries
+library(GGally)
+library(gtsummary)
+library(ranger)
+library(tidyverse)
+library(tidymodels)
+library(ISLR2)
+
+# Load the dataset
+Sales <- ISLR2::Carseats %>%
+  mutate(Sales = ifelse(Sales <= 8, "Low", "High")) 
+  # Check the structure of the dataset
+glimpse(Sales)
+```
+
+```{r}
+# Numerical summaries stratified by the outcome `Sales`.
+Sales %>% tbl_summary(by = Sales)
+```
+
+```{r}
+# Graphical summary:
+ Sales %>% ggpairs()
+```
+
+```{r}
+# For reproducibility
+set.seed(203)
+
+data_split <- initial_split(
+  Sales, 
+  # stratify by AHD
+  strata = "Sales", 
+  prop = 0.75
+  )
+data_split
+```
+
+```{r}
+Sales_other <- training(data_split)
+dim(Sales_other)
+```
+
+```{r}
+Sales_test <- testing(data_split)
+dim(Sales_test)
+```
+
+```{r}
+svm_recipe <- 
+  recipe(
+    Sales ~ ., 
+    data = Sales_other
+  ) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors())
+svm_recipe
+```
+
+```{r}
+svm_mod <- 
+  svm_poly(
+    mode = "classification",
+    cost = tune(),
+    degree = tune(),
+    # scale_factor = tune()
+  ) %>% 
+  set_engine("kernlab")
+svm_mod
+```
+
+```{r}
+svm_wf <- workflow() %>%
+  add_recipe(svm_recipe) %>%
+  add_model(svm_mod)
+svm_wf
+```
+
+```{r}
+param_grid <- grid_regular(
+  cost(range = c(-3, 2)),
+  degree(range = c(1, 5)),
+  #scale_factor(range = c(-1, 1)),
+  levels = c(5)
+  )
+param_grid
+```
+
+```{r}
+set.seed(203)
+
+folds <- vfold_cv(Sales_other, v = 5)
+folds
+```
+
+```{r}
+svm_fit <- svm_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = param_grid,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+svm_fit
+```
+
+```{r}
+svm_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "roc_auc" ) %>%
+  ggplot(mapping = aes(x = degree, y = mean)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Cost", y = "CV AUC") +
+  scale_x_log10()
+```
+
+
+```{r}
+svm_fit %>%
+  show_best("roc_auc")
+```
+
+
+```{r}
+best_svm <- svm_fit %>%
+  select_best("roc_auc")
+best_svm
+```
+
+```{r}
+# Final workflow
+final_wf <- svm_wf %>%
+  finalize_workflow(best_svm)
+final_wf
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit <- 
+  final_wf %>%
+  last_fit(data_split)
+final_fit
+```
+
+```{r}
+# Test metrics
+final_fit %>% 
+  collect_metrics()
+```
+
+```{r}
+install.packages("doParallel", repos = "https://cloud.r-project.org/")
+library(doParallel)
+
+set.seed(101)
+split_obj <- initial_split(data = Sales, prop = 0.7, strata = Sales)
+train <- training(split_obj)
+test <- testing(split_obj)
+
+
+# Create the recipe
+recipe(Sales ~ ., data = train) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors()) %>%
+  # estimate the means and standard deviations
+  prep() -> recipe_obj
+
+# Bake
+train <- bake(recipe_obj, new_data=train)
+test <- bake(recipe_obj, new_data=test)
+```
+
+```{r}
+library(vip)
+final_fit %>% 
+  pluck(".workflow", 1) %>%   
+  pull_workflow_fit() %>% 
+  # vip(method = "permute", train= Sales)
+  vip(method = "permute", 
+      target = "Sales", metric = "accuracy",
+      pred_wrapper = kernlab::predict, train = train)
+```
+
+```{r}
+# Check for missing values in the training data
+any_missing <- any(is.na(train))
+any_missing
+```
+
+
+```{r}
+svm_rbf_spec <- svm_rbf() %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_rbf_fit <- svm_rbf_spec %>%
+  fit(Sales ~ ., data = train[, c('Price', 'Age', 'Sales')])
+
+svm_rbf_fit %>%
+  extract_fit_engine() %>%
+  plot()
+```
+
+### Machine Learning Workflow: SVM with RBF Kernel (Carseats Data))
+```{r}
+sessionInfo()
+```
+
+```{r}
+# Load libraries
+library(GGally)
+library(gtsummary)
+library(kernlab)
+library(tidyverse)
+library(tidymodels)
+library(ISLR2)
+
+# Load the dataset
+Carsets <- ISLR2::Carseats %>%
+  mutate(Sales = ifelse(Sales <= 8, "Low", "High")) 
+  # Check the structure of the dataset
+glimpse(Carsets)
+```
+
+```{r}
+# Numerical summaries stratified by the outcome `Sales`.
+Carsets %>% tbl_summary(by = Sales)
+```
+
+```{r}
+# Graphical summary:
+Carsets %>% ggpairs()
+```
+
+```{r}
+# For reproducibility
+set.seed(203)
+
+data_split2 <- initial_split(
+  Carsets, 
+  # stratify by Sales
+  strata = "Sales", 
+  prop = 0.75
+  )
+data_split2
+```
+
+```{r}
+Carsets_other <- training(data_split2)
+dim(Carsets_other)
+```
+
+```{r}
+Carsets_test <- testing(data_split2)
+dim(Carsets_test)
+```
+
+```{r}
+svm_recipe2 <- 
+  recipe(
+    Sales ~ ., 
+    data = Carsets_other
+  ) %>%
+  # create traditional dummy variables (necessary for svm)
+  step_dummy(all_nominal_predictors()) %>%
+  # zero-variance filter
+  step_zv(all_numeric_predictors()) %>% 
+  # center and scale numeric data
+  step_normalize(all_numeric_predictors())
+svm_recipe2
+```
+
+```{r}
+svm_mod2 <- 
+  svm_rbf(
+    mode = "classification",
+    cost = tune(),
+    rbf_sigma = tune()
+  ) %>% 
+  set_engine("kernlab")
+svm_mod2
+```
+
+```{r}
+svm_wf2 <- workflow() %>%
+  add_recipe(svm_recipe2) %>%
+  add_model(svm_mod2)
+svm_wf2
+```
+
+```{r}
+param_grid2 <- grid_regular(
+  cost(range = c(-8, 5)),
+  rbf_sigma(range = c(-5, -3)),
+  levels = c(14, 5)
+  )
+param_grid2
+```
+
+```{r}
+set.seed(203)
+
+folds2 <- vfold_cv(Carsets_other, v = 5)
+folds2
+```
+
+
+```{r}
+svm_fit2 <- svm_wf2 %>%
+  tune_grid(
+    resamples = folds2,
+    grid = param_grid2,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+svm_fit2
+```
+
+```{r}
+svm_fit2 %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "roc_auc") %>%
+  ggplot(mapping = aes(x = cost, y = mean, alpha = rbf_sigma)) +
+  geom_point() +
+  geom_line(aes(group = rbf_sigma)) +
+  labs(x = "Cost", y = "CV AUC") +
+  scale_x_log10()
+```
+
+```{r}
+svm_fit2 %>%
+  show_best("roc_auc")
+```
+
+```{r}
+best_svm2 <- svm_fit2 %>%
+  select_best("roc_auc")
+best_svm2
+```
+
+```{r}
+# Final workflow
+final_wf2 <- svm_wf2 %>%
+  finalize_workflow(best_svm2)
+final_wf2
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit2 <- 
+  final_wf2 %>%
+  last_fit(data_split2)
+final_fit2
+```
+
+```{r}
+# Test metrics
+final_fit2 %>% 
+  collect_metrics()
+```
+Comparing these metrics:
+AUC Comparison:
+The AUC for the current method (0.9479124) is higher than that of the classification tree (0.85), random forest (0.91), and boosting methods (0.92) used in HW4. This indicates that the current method has better discrimination ability in distinguishing between the positive and negative classes compared to the methods used in HW4.
+Accuracy Comparison:
+The accuracy of the current method (0.84) is lower than that of random forest (0.88) and slightly lower than the boosting methods (0.87) used in HW4, but it's higher than that of the classification tree (0.82) used in HW4.
+Based on these comparisons, the current method seems to outperform the methods used in HW4 in terms of AUC, but its accuracy is slightly lower than random forest and boosting methods while being higher than the classification tree. However, the choice of the best method depends on various factors such as the specific requirements of the application, interpretability, computational complexity, etc.
+
 ## Bonus (10pts)
 
 Let
