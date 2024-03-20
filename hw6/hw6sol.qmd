@@ -1,0 +1,859 @@
+---
+title: "Biostat 212a Homework 6"
+subtitle: "Due Mar 22, 2024 @ 11:59PM"
+author: "Yangn An and UID: 106332601"
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+engine: knitr
+knitr:
+  opts_chunk: 
+    fig.align: 'center'
+    # fig.width: 6
+    # fig.height: 4
+    message: FALSE
+    cache: false
+---
+
+Load R libraries.
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(tidymodels)
+library(readr)
+library(tswge)
+library(ggplot2)
+library(yardstick)
+
+acfdf <- function(vec) {
+    vacf <- acf(vec, plot = F)
+    with(vacf, data.frame(lag, acf))
+}
+
+ggacf <- function(vec) {
+    ac <- acfdf(vec)
+    ggplot(data = ac, aes(x = lag, y = acf)) + geom_hline(aes(yintercept = 0)) + 
+        geom_segment(mapping = aes(xend = lag, yend = 0))
+}
+
+tplot <- function(vec) {
+    df <- data.frame(X = vec, t = seq_along(vec))
+    ggplot(data = df, aes(x = t, y = X)) + geom_line()
+}
+```
+
+## New York Stock Exchange (NYSE) data (1962-1986) (140 pts)
+
+::: {#fig-nyse}
+
+<p align="center">
+![](ISL_fig_10_14.pdf){width=600px height=600px}
+</p>
+
+Historical trading statistics from the New York Stock Exchange. Daily values of the normalized log trading volume, DJIA return, and log volatility are shown for a 24-year period from 1962-1986. We wish to predict trading volume on any day, given the history on all earlier days. To the left of the red bar (January 2, 1980) is training data, and to the right test data.
+
+:::
+
+The [`NYSE.csv`](https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/NYSE.csv) file contains three daily time series from the New York Stock Exchange (NYSE) for the period Dec 3, 1962-Dec 31, 1986 (6,051 trading days).
+
+- `Log trading volume` ($v_t$): This is the fraction of all outstanding shares that are traded on that day, relative to a 100-day moving average of past turnover, on the log scale.
+    
+- `Dow Jones return` ($r_t$): This is the difference between the log of the Dow Jones Industrial Index on consecutive trading days.
+    
+- `Log volatility` ($z_t$): This is based on the absolute values of daily price movements.
+
+```{r}
+# Read in NYSE data from url
+
+url = "https://raw.githubusercontent.com/ucla-biostat-212a/2024winter/master/slides/data/NYSE.csv"
+NYSE <- read_csv(url)
+
+NYSE
+```
+The **autocorrelation** at lag $\ell$ is the correlation of all pairs $(v_t, v_{t-\ell})$ that are $\ell$ trading days apart. These sizable correlations give us confidence that past values will be helpful in predicting the future.
+
+```{r}
+#| code-fold: true
+#| label: fig-nyse-autocor
+#| fig-cap: "The autocorrelation function for log volume. We see that nearby values are fairly strongly correlated, with correlations above 0.2 as far as 20 days apart."
+
+ggacf(NYSE$log_volume) + ggthemes::theme_few()
+
+```
+
+Do a similar plot for (1) the correlation between $v_t$ and lag $\ell$ `Dow Jones return` $r_{t-\ell}$ and (2) correlation between $v_t$ and lag $\ell$ `Log volatility` $z_{t-\ell}$.
+
+```{r}
+#| code-fold: true
+#| label: fig-v-vs-lagged-r
+#| fig-cap: "Correlations between log_volume and lagged DJ_return."
+
+seq(1, 30) %>% 
+  map(function(x) {cor(NYSE$log_volume , lag(NYSE$DJ_return, x), use = "pairwise.complete.obs")}) %>% 
+  unlist() %>% 
+  tibble(lag = 1:30, cor = .) %>% 
+  ggplot(aes(x = lag, y = cor)) + 
+  geom_hline(aes(yintercept = 0)) + 
+  geom_segment(mapping = aes(xend = lag, yend = 0)) + 
+  ggtitle("AutoCorrelation between `log volume` and lagged `DJ return`")
+```
+```{r}
+#| code-fold: true
+#| label: fig-v-vs-lagged-z
+#| fig-cap: "Weak correlations between log_volume and lagged log_volatility."
+
+seq(1, 30) %>% 
+  map(function(x) {cor(NYSE$log_volume , lag(NYSE$log_volatility, x), use = "pairwise.complete.obs")}) %>% 
+  unlist() %>% 
+  tibble(lag = 1:30, cor = .) %>% 
+  ggplot(aes(x = lag, y = cor)) + 
+  geom_hline(aes(yintercept = 0)) + 
+  geom_segment(mapping = aes(xend = lag, yend = 0)) + 
+  ggtitle("AutoCorrelation between `log volume` and lagged `log volatility`")
+```
+
+
+
+### Project goal
+
+Our goal is to forecast daily `Log trading volume`, using various machine learning algorithms we learnt in this class. 
+
+The data set is already split into train (before Jan 1st, 1980, $n_{\text{train}} = 4,281$) and test (after Jan 1st, 1980, $n_{\text{test}} = 1,770$) sets.
+
+<!-- Include `day_of_week` as a predictor in the models. -->
+
+In general, we will tune the lag $L$ to acheive best forecasting performance. In this project, we would fix $L=5$. That is we always use the previous five trading days' data to forecast today's `log trading volume`.
+
+Pay attention to the nuance of splitting time series data for cross validation. Study and use the [`time-series`](https://www.tidymodels.org/learn/models/time-series/) functionality in tidymodels. Make sure to use the same splits when tuning different machine learning algorithms.
+
+Use the $R^2$ between forecast and actual values as the cross validation and test evaluation criterion.
+
+### Baseline method (20 pts)
+
+We use the straw man (use yesterday’s value of `log trading volume` to predict that of today) as the baseline method. Evaluate the $R^2$ of this method on the test data.
+
+
+Before we tune different machine learning methods, let's first separate into the test and non-test sets. We drop the first 5 trading days which lack some lagged variables.
+
+```{r}
+# Lag: look back L trading days
+# Do not need to include, as we included them in receipe
+L = 5
+
+for(i in seq(1, L)) {
+  NYSE <- NYSE %>% 
+    mutate(!!paste("DJ_return_lag", i, sep = "") := lag(NYSE$DJ_return, i),
+           !!paste("log_volume_lag", i, sep = "") := lag(NYSE$log_volume, i),
+           !!paste("log_volatility_lag", i, sep = "") := lag(NYSE$log_volatility, i))
+}
+
+
+NYSE <-   NYSE %>% na.omit()
+```
+
+
+```{r}
+# Drop beginning trading days which lack some lagged variables
+NYSE_other <- NYSE %>% 
+  filter(train == 'TRUE') %>%
+  select(-train) %>%
+  drop_na()
+dim(NYSE_other)
+```
+
+```{r}
+NYSE_test = NYSE %>% 
+  filter(train == 'FALSE') %>%
+  select(-train) %>%
+  drop_na()
+dim(NYSE_test)
+```
+
+```{r}
+library(yardstick)
+# cor(NYSE_test$log_volume, NYSE_test$log_volume_lag1) %>% round(2)
+r2_test_strawman =  rsq_vec(NYSE_test$log_volume, lag(NYSE_test$log_volume, 1)) %>% round(2)
+print(paste("Straw man test R2: ", r2_test_strawman))
+```
+
+
+### Autoregression (AR) forecaster (30 pts)
+
+- Let
+$$
+y = \begin{pmatrix} v_{L+1} \\ v_{L+2} \\ v_{L+3} \\ \vdots \\ v_T \end{pmatrix}, \quad M = \begin{pmatrix}
+1 & v_L & v_{L-1} & \cdots & v_1 \\
+1 & v_{L+1} & v_{L} & \cdots & v_2 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & v_{T-1} & v_{T-2} & \cdots & v_{T-L}
+\end{pmatrix}.
+$$
+
+- Fit an ordinary least squares (OLS) regression of $y$ on $M$, giving
+$$
+\hat v_t = \hat \beta_0 + \hat \beta_1 v_{t-1} + \hat \beta_2 v_{t-2} + \cdots + \hat \beta_L v_{t-L},
+$$
+known as an **order-$L$ autoregression** model or **AR($L$)**.
+
+- Before we start the model training, let's talk about time series resampling. We will use the `rolling_origin` function in the `rsample` package to create a time series cross-validation plan.
+
+- When the data have a strong time component, a resampling method should support modeling to estimate seasonal and other temporal trends within the data. A technique that randomly samples values from the training set can disrupt the model’s ability to estimate these patterns.
+
+
+```{r}
+NYSE %>% 
+  ggplot(aes(x = date, y = log_volume)) + 
+  geom_line() + 
+  geom_smooth(method = "lm")
+```
+
+
+```{r}
+wrong_split <- initial_split(NYSE_other)
+
+bind_rows(
+  training(wrong_split) %>% mutate(type = "train"),
+  testing(wrong_split) %>% mutate(type = "test")
+) %>% 
+  ggplot(aes(x = date, y = log_volume, color = type, group = NA)) + 
+  geom_line()
+```
+```{r}
+correct_split <- initial_time_split(NYSE_other %>% arrange(date))
+
+bind_rows(
+  training(correct_split) %>% mutate(type = "train"),
+  testing(correct_split) %>% mutate(type = "test")
+) %>% 
+  ggplot(aes(x = date, y = log_volume, color = type, group = NA)) + 
+  geom_line()
+```
+```{r}
+rolling_origin(NYSE_other %>% arrange(date), initial = 30, assess = 7) %>%
+#sliding_period(NYSE_other %>% arrange(date), date, period = "day", lookback = Inf, assess_stop = 1) %>% 
+  mutate(train_data = map(splits, analysis),
+         test_data = map(splits, assessment)) %>% 
+  select(-splits) %>% 
+  pivot_longer(-id) %>% 
+  filter(id %in% c("Slice0001", "Slice0002", "Slice0003")) %>% 
+  unnest(value) %>% 
+  ggplot(aes(x = date, y = log_volume, color = name, group = NA)) + 
+  geom_point() + 
+  geom_line() +
+  facet_wrap(~id, scales = "fixed")
+```
+
+```{r}
+sliding_period(NYSE_other %>% arrange(date), 
+               date, period = "month", lookback = Inf, assess_stop = 1) %>% 
+  mutate(train_data = map(splits, analysis),
+         test_data = map(splits, assessment)) %>% 
+  select(-splits) %>% 
+  pivot_longer(-id) %>% 
+  filter(id %in% c("Slice001", "Slice002", "Slice003")) %>% 
+  unnest(value) %>% 
+  ggplot(aes(x = date, y = log_volume, color = name, group = NA)) + 
+  geom_point() +
+  geom_line() + 
+  facet_wrap(~id, scales = "fixed")
+```
+
+- Rolling forecast origin resampling ([Hyndman and Athanasopoulos 2018](https://otexts.com/fpp3/)) provides a method that emulates how time series data is often partitioned in practice, estimating the model with historical data and evaluating it with the most recent data. 
+
+
+- Tune AR(5) with elastic net (lasso + ridge) regularization using all 3 features on the training data, and evaluate the test performance. 
+
+### Preprocessing
+
+```{r}
+en_receipe <- 
+  recipe(log_volume ~ ., data = NYSE_other) %>% 
+  step_dummy(all_nominal(), -all_outcomes()) %>% 
+  step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
+  step_naomit(all_predictors()) %>%
+  prep(data = NYSE_other)
+en_receipe
+```
+
+### Model training
+
+```{r}
+### Model
+enet_mod <- 
+  # mixture = 0 (ridge), mixture = 1 (lasso)
+  # mixture = (0, 1) elastic net 
+  # As an example, we set mixture = 0.5. It needs to be tuned.
+  linear_reg(penalty = tune(), mixture = 0.5) %>% 
+  set_engine("glmnet")
+enet_mod
+```
+```{r}
+en_wf <- 
+  workflow() %>%
+  add_model(enet_mod) %>%
+  add_recipe(en_receipe %>% step_rm(date) %>% step_indicate_na())
+en_wf
+```
+
+```{r}
+folds <- NYSE_other %>% arrange(date) %>%
+    sliding_period(date, period = "month", lookback = Inf, assess_stop = 1)
+  # rolling_origin(initial = 5, assess = 1)
+folds
+
+month_folds <- NYSE_other %>%
+  sliding_period(
+    date,
+    "month",
+    lookback = Inf,
+    skip = 4)
+month_folds
+```
+
+
+
+```{r}
+lambda_grid <-
+  grid_regular(penalty(range = c(-8, -7), trans = log10_trans()), levels = 3)
+lambda_grid
+```
+
+```{r}
+en_fit <- tune_grid(en_wf, resamples = month_folds, grid = lambda_grid) 
+en_fit
+```
+
+```{r}
+en_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rsq") %>%
+  ggplot(mapping = aes(x = penalty, y = mean)) + 
+  geom_point() + 
+  geom_line() + 
+  labs(x = "Penalty", y = "CV RMSE") + 
+  scale_x_log10(labels = scales::label_number())
+```
+
+```{r}
+en_fit %>%
+  show_best("rsq")
+```
+```{r}
+best_en_fit <- en_fit %>%
+  select_best("rsq")
+best_en_fit
+```
+
+
+```{r}
+# Final workflow
+final_wf_en <- en_wf %>%
+  finalize_workflow(best_en_fit)
+final_wf_en
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_en <- 
+  final_wf_en %>%
+  last_fit(correct_split)
+final_fit_en
+```
+
+```{r}
+# Test metrics
+final_fit_en %>% collect_metrics()
+```
+
+```{r}
+predictions <- final_fit_en %>%
+  collect_predictions()
+predictions
+```
+
+- Hint: [Workflow: Lasso](https://ucla-biostat-212a.github.io/2024winter/slides/06-modelselection/workflow_lasso.html) is a good starting point.
+
+
+### Random forest forecaster (30pts)
+
+- Use the same features as in AR($L$) for the random forest. Tune the random forest and evaluate the test performance.
+
+- Hint: [Workflow: Random Forest for Prediction](https://ucla-biostat-212a.github.io/2024winter/slides/08-tree/workflow_rf_reg.html) is a good starting point.
+
+```{r}
+rf_recipe <- recipe(log_volume ~ ., data = NYSE_other) %>% 
+  step_dummy(all_nominal(), -all_outcomes()) %>% 
+  step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
+  step_naomit(all_predictors()) %>%
+  prep(data = NYSE_other)
+rf_recipe
+```
+
+```{r}
+rf_mod <- 
+  rand_forest(
+    mode = "regression",
+    # Number of predictors randomly sampled in each split
+    mtry = tune(),
+    # Number of trees in ensemble
+    trees = tune()
+  ) %>% 
+  set_engine("ranger")
+rf_mod
+```
+
+```{r}
+rf_wf <- workflow() %>%
+   add_recipe(rf_recipe %>% step_rm(date) %>% step_indicate_na()) %>%
+  add_model(rf_mod)
+rf_wf
+```
+
+```{r}
+folds <- NYSE_other %>% arrange(date) %>%
+    sliding_period(date, period = "month", lookback = Inf, assess_stop = 1)
+  # rolling_origin(initial = 5, assess = 1)
+folds
+
+month_folds <- NYSE_other %>%
+  sliding_period(
+    date,
+    "month",
+    lookback = Inf,
+    skip = 4)
+month_folds
+```
+
+```{r}
+rf_grid <- grid_regular(
+  trees(range = c(100L, 300L)), 
+  mtry(range = c(1L, 5L)),
+  levels = c(3, 5)
+  )
+rf_grid
+```
+
+```{r}
+rf_fit <- tune_grid(
+  rf_wf,
+  resamples = month_folds,
+  grid = rf_grid,
+ metrics = metric_set(rmse, rsq)  
+)
+rf_fit
+```
+
+
+```{r}
+rf_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rsq") %>%
+  mutate(mtry = as.factor(mtry)) %>%
+  ggplot(mapping = aes(x = trees, y = mean, color = mtry)) +
+  # geom_point() + 
+  geom_line() + 
+  labs(x = "Num. of Trees", y = "CV mse")
+```
+
+
+```{r}
+# Final workflow
+rf_fit %>%
+  show_best("rsq")
+```
+
+```{r}
+best_rf <- rf_fit %>%
+  select_best("rsq")
+best_rf
+```
+```{r}
+# Final workflow
+final_wf_rf <- rf_wf %>%
+  finalize_workflow(best_rf)
+final_wf_rf
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_rf <- 
+  final_wf_rf %>%
+  last_fit(correct_split)
+final_fit_rf
+```
+
+```{r}
+# Test metrics
+final_fit_rf %>% 
+  collect_metrics()
+```
+
+
+
+### Boosting forecaster (30pts)
+
+- Use the same features as in AR($L$) for the boosting. Tune the boosting algorithm and evaluate the test performance.
+
+- Hint: [Workflow: Boosting tree for Prediction](https://ucla-biostat-212a.github.io/2024winter/slides/08-tree/workflow_boosting_reg.html) is a good starting point.
+
+
+```{r}
+boost_recipe <- recipe(log_volume ~ ., data = NYSE_other) %>% 
+  step_dummy(all_nominal(), -all_outcomes()) %>% 
+  step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
+  step_naomit(all_predictors()) %>%
+  prep(data = NYSE_other)
+boost_recipe
+```
+
+
+```{r}
+gb_mod <- 
+  boost_tree(
+    mode = "regression",
+    trees = 1000, 
+    tree_depth = tune(),
+    learn_rate = tune()
+  ) %>% 
+  set_engine("xgboost")
+gb_mod
+```
+
+```{r}
+boost_workflow <- workflow() %>%
+  add_model(gb_mod) %>%
+  add_recipe(boost_recipe %>% step_rm(date) %>% step_indicate_na())
+boost_workflow
+```
+
+```{r}
+folds <- NYSE_other %>% arrange(date) %>%
+    sliding_period(date, period = "month", lookback = Inf, assess_stop = 1)
+  # rolling_origin(initial = 5, assess = 1)
+
+
+month_folds <- NYSE_other %>%
+  sliding_period(
+    date,
+    "month",
+    lookback = Inf,
+    skip = 4)
+```
+
+```{r}
+boost_grid <- grid_regular(
+  tree_depth(range = c(1L, 2L)), 
+  learn_rate(range = c(-3, -2), trans = log10_trans()), 
+  levels = c(2, 3) 
+)
+boost_grid
+```
+
+```{r}
+
+boost_fit <- tune_grid(
+  boost_workflow,
+  resamples = month_folds,
+  grid = boost_grid,
+  metrics = metric_set(rmse, rsq)
+)
+boost_fit
+```
+
+```{r}
+boost_fit %>%
+  collect_metrics() %>%
+  print(width = Inf) %>%
+  filter(.metric == "rsq") %>%
+  ggplot(mapping = aes(x = learn_rate, y = mean, color = factor(tree_depth))) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Learning Rate", y = "CV AUC") +
+  scale_x_log10()
+```
+
+```{r}
+boost_fit %>%
+  show_best("rsq")
+```
+
+```{r}
+best_gb <- boost_fit %>%
+  select_best("rsq")
+best_gb
+```
+
+```{r}
+# Final workflow
+final_wf_boost <- boost_workflow %>%
+  finalize_workflow(best_gb)
+final_wf_boost
+```
+
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_boost <- 
+  final_wf_boost %>%
+  last_fit(correct_split)
+final_fit_boost
+```
+
+```{r}
+# Test metrics
+final_fit_boost %>% 
+  collect_metrics()
+```
+
+
+
+
+
+### Summary (30pts)
+
+Your score for this question is largely determined by your final test performance.
+
+Summarize the performance of different machine learning forecasters in the following format. 
+
+The summary of the performance of various machine learning forecasters on predicting the daily Log trading volume using the New York Stock Exchange data from 1962 to 1986, with training data up to January 2, 1980, is presented below. The evaluation of model performance was based on the coefficient of determination (R^2), both on cross-validation (CV) and on the unseen test data. The R^2 metric measures the proportion of variance in the dependent variable that is predictable from the independent variables, with values closer to 1 indicating better model performance.
+| Method | CV $R^2$ | Test $R^2$ |
+|:------:|:------:|:------:|:------:|
+| Baseline | - |Straw man test R2: 0.35 |
+| AR(5) | 0.38 | 0.69 |
+| Random Forest | 0.34| 0.65| 
+| Boosting | 0.37| 0.67| 
+Baseline (Straw man): The baseline model, which uses the previous day's log trading volume as the prediction for the current day, achieved a R^2 of 0.35 on the test set. This simple model serves as a point of comparison for more complex models. 
+
+AR(5): An autoregressive model of order 5 (AR(5)), which uses the past 5 days of log trading volume to predict the current day's volume, showed an improvement over the baseline, with a CV R^2 of 0.38 and a test R^2 of 0.69. This indicates that incorporating more historical data points helps in improving the prediction accuracy.
+
+Random Forest: The Random Forest model, which is a non-linear and more complex model compared to AR(5), achieved a slightly lower CV R^2 of 0.34 but also a lower test R^2 of 0.65. This suggests that despite its ability to capture complex patterns in the data, it might be overfitting to the training data or not capturing the time series dynamics as effectively as linear models in this specific case.
+
+Boosting: The Boosting model, another sophisticated and flexible ensemble method, showed a CV R^2 of 0.37 and a test R^2 of 0.67. It performed better than the Random Forest model but was still slightly behind the AR(5) model in terms of test performance. Boosting's iterative approach to correcting errors might be beneficial for this time series forecasting task, although it didn't outperform the simpler AR(5) model.
+
+Conclusion:
+The AR(5) model, despite its simplicity, provided the best performance on the test data among the models evaluated. This suggests that for the task of forecasting daily Log trading volume, a linear approach that directly incorporates recent historical values can be very effective. Meanwhile, the more complex Random Forest and Boosting models did not achieve higher performance, highlighting the importance of model selection and the possibility that simpler models may suffice for certain forecasting tasks.
+### Extension reading   
+- [MOIRAI: Salesforce’s Foundation Model for Time-Series Forecasting](https://towardsdatascience.com/moirai-salesforces-foundation-model-for-time-series-forecasting-4eff6c34093d)
+
+
+
+
+## ISL Exercise 12.6.13 (90 pts)
+
+13. On the book website, www.statlearning.com, there is a gene expres- sion data set (Ch12Ex13.csv) that consists of 40 tissue samples with measurements on 1,000 genes. The first 20 samples are from healthy patients, while the second 20 are from a diseased group.
+Load in the data using read.csv(). You will need to select header = F.
+(b) Apply hierarchical clustering to the samples using correlation- based distance, and plot the dendrogram. Do the genes separate the samples into the two groups? Do your results depend on the type of linkage used?
+(c) Your collaborator wants to know which genes differ the most across the two groups. Suggest a way to answer this question, and apply it here.
+
+import data
+```{r}
+library(tidyverse)
+library(cluster)
+library(ggplot2)
+# Load the data
+gene_express <- read.csv('../hw6/Ch12Ex13.csv', header = FALSE)
+
+# Few top rows of the dataset:
+head(gene_express)
+
+```
+### 12.6.13 (b) (30 pts)
+There are several methods of “dissimilarity” (correlation based distance) which can be explored for creation of distance matrix.
+
+I am using the following method to create a distance matrix:
+Dissimilarity = 1 - Correlation
+the as.dist() function is used here to assign the correlation values to be “distances”
+Correlation-based distance can be computed using the as.dist() function, which converts an arbitrary square symmetric matrix into a form that the hclust() function recognizes as a distance matrix.
+The hclust() function implements hierarchical clustering in R.
+
+We now plot the hierarchical clustering dendrogram using complete, single, and average linkage clustering using correlation based distance.
+```{r}
+dd=as.dist(1- cor(gene_express))
+
+# To plot the dendrograms obtained using the usual plot() function.
+# The numbers at the bottom of the plot identify each observation.
+
+plot(hclust(dd, method ="complete"), main=" Complete Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+
+```{r}
+plot(hclust(dd, method ="average"), main=" Average Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+
+```{r}
+plot(hclust(dd, method ="single"), main=" Single Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+Inference:
+
+The choice of linkage certainly does affect the results obtained.
+As we see, we obtain two clusters for complete and single linkages and three clusters for average linkage
+Typically, single linkage will tend to yield trailing clusters: very large clusters onto which individual observations attach one-by-one. + On the other hand, complete and average linkage tend to yield more balanced, attractive clusters.
+For this reason, complete and average linkage are generally preferred to single linkage.
+
+### PCA and UMAP (30 pts)
+PCA
+```{r}
+
+library(FactoMineR)
+library(factoextra)
+
+# Applying PCA
+pca_res <- prcomp(t(gene_express), scale. = TRUE)
+
+# Plotting PCA results
+fviz_pca_ind(pca_res,
+             col.ind = rep(c("Healthy", "Diseased"), each = 20), # Color by group
+             legend.title = "Group",
+             title = "PCA of Gene Expression Data")
+
+```
+UMAP
+```{r}
+library(umap)
+# Preparing data for UMAP
+data_for_umap <- t(gene_express) # Transposing the data may be necessary depending on the function
+
+# Applying UMAP
+umap_res <- umap(data_for_umap)
+
+# Plotting UMAP results
+df_umap <- as.data.frame(umap_res$layout)
+df_umap$Group <- rep(c("Healthy", "Diseased"), each = 20)
+ggplot(df_umap, aes(V1, V2, color = Group)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "UMAP of Gene Expression Data",
+       x = "UMAP 1", y = "UMAP 2", color = "Group")
+```
+
+### 12.6.13 (c) (30 pts)
+To analyze the gene expression data and identify which genes exhibit the most significant differences between two groups (healthy and diseased), we will employ the prcomp() function for Principal Component Analysis (PCA). This technique reduces the dimensionality while preserving as much of the variation as possible. By setting scale = TRUE, we ensure that each variable is not only centered to have a mean of zero but is also scaled to have a unit standard deviation. This standardization is crucial for comparing features that may have different units or scales of measurement.
+
+The output of prcomp(), specifically the rotation component, contains the loadings of the principal components. These loadings can be interpreted as the contribution or weight of each gene to the principal components. Essentially, they help in understanding how strongly each gene is associated with the different dimensions (principal components) extracted during PCA. In this context, examining the loadings can highlight the genes that differ most significantly between the healthy and diseased groups, as indicated by their contribution to the principal axes of variation within the data.
+```{r}
+pr.out <- prcomp(t(gene_express), scale = TRUE)
+head(pr.out$rotation)
+```
+
+```{r}
+
+
+gene.load <- apply(pr.out$rotation, 1, sum)
+
+gene.differ <- order(abs(gene.load), decreasing = TRUE)
+
+#the top most different genes across the two groups
+gene.differ[1:20]
+```
+
+```{r}
+# Assuming the first 20 samples are healthy and the next 20 are diseased
+healthy <- gene_express[1:20, ]
+diseased <- gene_express[21:40, ]
+
+# Applying t-test for each gene and storing p-values
+p_values <- apply(gene_express, 2, function(gene) t.test(gene[1:20], gene[21:40])$p.value)
+
+# Adjusting for multiple testing (e.g., Bonferroni correction)
+p_adjusted <- p.adjust(p_values, method = "bonferroni")
+
+# Identifying genes with significant differences
+significant_genes <- which(p_adjusted < 0.05)
+
+# Print significant genes
+print(significant_genes)
+```
+The PCA approach gives you genes that are important for the variance in the dataset but does not directly tell you about the difference between healthy and diseased samples.
+The t-test approach provides a direct answer to which genes have significantly different expressions between the two groups.
+Therefore, if your collaborator's question is specifically about which genes differ the most between healthy and diseased groups, the t-test approach provides the direct answer: genes 29, 39, and 40 have significantly different expressions between the two groups, as indicated by the adjusted p-values being below 0.05.
+```{r}
+Ch12Ex13 <- read_csv("../hw6/Ch12Ex13.csv", col_names = paste("ID", 1:40, sep = ""))
+Ch12Ex13 
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(readr)
+library(tswge)
+library(ggplot2)
+library(yardstick)
+library(workflows)
+library(parsnip)
+library(tidyclust)
+library(RcppHungarian)
+set.seed(838383)
+hc_spec <- hier_clust(
+  # num_clusters = 3,
+  linkage_method = "average"
+)
+
+
+hc_fit <- hc_spec %>%
+  fit(~ .,
+    data = as.data.frame(t(Ch12Ex13)) 
+  )
+
+hc_fit %>%
+  summary()
+```
+
+```{r}
+hc_fit$fit %>% plot()
+```
+
+
+```{r}
+grp = factor(rep(c(1, 0), each = 20))
+
+regression <- function(y) {
+  sum <- summary(lm(y ~ grp))
+  pv <- sum$coefficients[2, 4]
+  return(pv)
+}
+
+
+out <- tibble(gene = seq(1, nrow(Ch12Ex13)),
+              p_values = unlist(purrr:: map(1:nrow(Ch12Ex13), ~regression(as.matrix(Ch12Ex13)[.x, ]))))
+```
+
+```{r}
+out %>% arrange(p_values) %>% head(10)
+
+# sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05/nrow(Ch12Ex13))
+sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05 )
+```
+
+```{r}
+# install.packages("pheatmap")
+library(pheatmap)
+# install.packages("ggplotify")
+library(ggplotify) ## to convert pheatmap to ggplot2
+# install.packages("heatmaply")
+library(heatmaply) ## for constructing interactive heatmap
+```
+
+```{r}
+
+#create data frame for annotations
+dfh <- data.frame(sample=as.character(colnames(Ch12Ex13)), status = "disease") %>%
+                column_to_rownames("sample")
+dfh$status[seq(21, 40)] <-  "healthy"
+dfh
+
+
+pheatmap(Ch12Ex13[sig$gene, ], cluster_rows = FALSE, cluster_cols = T, scale="row", annotation_col = dfh,
+         annotation_colors=list(status = c(disease = "orange", healthy = "black")),
+         color=colorRampPalette(c("navy", "white", "red"))(50))
+```
