@@ -649,7 +649,7 @@ The AR(5) model, despite its simplicity, provided the best performance on the te
 ## ISL Exercise 12.6.13 (90 pts)
 
 13. On the book website, www.statlearning.com, there is a gene expres- sion data set (Ch12Ex13.csv) that consists of 40 tissue samples with measurements on 1,000 genes. The first 20 samples are from healthy patients, while the second 20 are from a diseased group.
-(a) Load in the data using read.csv(). You will need to select header = F.
+Load in the data using read.csv(). You will need to select header = F.
 (b) Apply hierarchical clustering to the samples using correlation- based distance, and plot the dendrogram. Do the genes separate the samples into the two groups? Do your results depend on the type of linkage used?
 (c) Your collaborator wants to know which genes differ the most across the two groups. Suggest a way to answer this question, and apply it here.
 
@@ -702,8 +702,7 @@ Typically, single linkage will tend to yield trailing clusters: very large clust
 For this reason, complete and average linkage are generally preferred to single linkage.
 
 ### PCA and UMAP (30 pts)
-
-
+PCA
 ```{r}
 
 library(FactoMineR)
@@ -737,7 +736,6 @@ ggplot(df_umap, aes(V1, V2, color = Group)) +
   labs(title = "UMAP of Gene Expression Data",
        x = "UMAP 1", y = "UMAP 2", color = "Group")
 ```
-
 
 ### 12.6.13 (c) (30 pts)
 To analyze the gene expression data and identify which genes exhibit the most significant differences between two groups (healthy and diseased), we will employ the prcomp() function for Principal Component Analysis (PCA). This technique reduces the dimensionality while preserving as much of the variation as possible. By setting scale = TRUE, we ensure that each variable is not only centered to have a mean of zero but is also scaled to have a unit standard deviation. This standardization is crucial for comparing features that may have different units or scales of measurement.
@@ -779,3 +777,83 @@ print(significant_genes)
 The PCA approach gives you genes that are important for the variance in the dataset but does not directly tell you about the difference between healthy and diseased samples.
 The t-test approach provides a direct answer to which genes have significantly different expressions between the two groups.
 Therefore, if your collaborator's question is specifically about which genes differ the most between healthy and diseased groups, the t-test approach provides the direct answer: genes 29, 39, and 40 have significantly different expressions between the two groups, as indicated by the adjusted p-values being below 0.05.
+```{r}
+Ch12Ex13 <- read_csv("../hw6/Ch12Ex13.csv", col_names = paste("ID", 1:40, sep = ""))
+Ch12Ex13 
+```
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(readr)
+library(tswge)
+library(ggplot2)
+library(yardstick)
+library(workflows)
+library(parsnip)
+library(tidyclust)
+library(RcppHungarian)
+set.seed(838383)
+hc_spec <- hier_clust(
+  # num_clusters = 3,
+  linkage_method = "average"
+)
+
+
+hc_fit <- hc_spec %>%
+  fit(~ .,
+    data = as.data.frame(t(Ch12Ex13)) 
+  )
+
+hc_fit %>%
+  summary()
+```
+
+```{r}
+hc_fit$fit %>% plot()
+```
+
+
+```{r}
+grp = factor(rep(c(1, 0), each = 20))
+
+regression <- function(y) {
+  sum <- summary(lm(y ~ grp))
+  pv <- sum$coefficients[2, 4]
+  return(pv)
+}
+
+
+out <- tibble(gene = seq(1, nrow(Ch12Ex13)),
+              p_values = unlist(purrr:: map(1:nrow(Ch12Ex13), ~regression(as.matrix(Ch12Ex13)[.x, ]))))
+```
+
+```{r}
+out %>% arrange(p_values) %>% head(10)
+
+# sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05/nrow(Ch12Ex13))
+sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05 )
+```
+
+```{r}
+# install.packages("pheatmap")
+library(pheatmap)
+# install.packages("ggplotify")
+library(ggplotify) ## to convert pheatmap to ggplot2
+# install.packages("heatmaply")
+library(heatmaply) ## for constructing interactive heatmap
+```
+
+```{r}
+
+#create data frame for annotations
+dfh <- data.frame(sample=as.character(colnames(Ch12Ex13)), status = "disease") %>%
+                column_to_rownames("sample")
+dfh$status[seq(21, 40)] <-  "healthy"
+dfh
+
+
+pheatmap(Ch12Ex13[sig$gene, ], cluster_rows = FALSE, cluster_cols = T, scale="row", annotation_col = dfh,
+         annotation_colors=list(status = c(disease = "orange", healthy = "black")),
+         color=colorRampPalette(c("navy", "white", "red"))(50))
+```
