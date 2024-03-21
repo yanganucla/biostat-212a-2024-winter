@@ -648,9 +648,10 @@ The AR(5) model, despite its simplicity, provided the best performance on the te
 
 ## ISL Exercise 12.6.13 (90 pts)
 
-13. On the book website, www.statlearning.com, there is a gene expres- sion data set (Ch12Ex13.csv) that consists of 40 tissue samples with measurements on 1,000 genes. The first 20 samples are from healthy patients, while the second 20 are from a diseased group.
+13. On the book website, www.statlearning.com, there is a gene expression data set (Ch12Ex13.csv) that consists of 40 tissue samples with measurements on 1,000 genes. The first 20 samples are from healthy patients, while the second 20 are from a diseased group.
 Load in the data using read.csv(). You will need to select header = F.
 (b) Apply hierarchical clustering to the samples using correlation- based distance, and plot the dendrogram. Do the genes separate the samples into the two groups? Do your results depend on the type of linkage used?
+PCA and UMAP
 (c) Your collaborator wants to know which genes differ the most across the two groups. Suggest a way to answer this question, and apply it here.
 
 import data
@@ -659,161 +660,12 @@ library(tidyverse)
 library(cluster)
 library(ggplot2)
 # Load the data
-gene_express <- read.csv('../hw6/Ch12Ex13.csv', header = FALSE)
+gene_express <- read.csv('../hw6/Ch12Ex13.csv', header = FALSE, col.names = paste("ID", 1:40, sep = ""))
 
 # Few top rows of the dataset:
 head(gene_express)
 
 ```
-### 12.6.13 (b) (30 pts)
-There are several methods of “dissimilarity” (correlation based distance) which can be explored for creation of distance matrix.
-
-I am using the following method to create a distance matrix:
-Dissimilarity = 1 - Correlation
-the as.dist() function is used here to assign the correlation values to be “distances”
-Correlation-based distance can be computed using the as.dist() function, which converts an arbitrary square symmetric matrix into a form that the hclust() function recognizes as a distance matrix.
-The hclust() function implements hierarchical clustering in R.
-
-We now plot the hierarchical clustering dendrogram using complete, single, and average linkage clustering using correlation based distance.
-```{r}
-dd=as.dist(1- cor(gene_express))
-
-# To plot the dendrograms obtained using the usual plot() function.
-# The numbers at the bottom of the plot identify each observation.
-
-plot(hclust(dd, method ="complete"), main=" Complete Linkage
-with Correlation - Based Distance ", xlab="", sub ="")
-```
-
-```{r}
-plot(hclust(dd, method ="average"), main=" Average Linkage
-with Correlation - Based Distance ", xlab="", sub ="")
-```
-
-```{r}
-plot(hclust(dd, method ="single"), main=" Single Linkage
-with Correlation - Based Distance ", xlab="", sub ="")
-```
-Inference:
-
-The choice of linkage certainly does affect the results obtained.
-As we see, we obtain two clusters for complete and single linkages and three clusters for average linkage
-Typically, single linkage will tend to yield trailing clusters: very large clusters onto which individual observations attach one-by-one. + On the other hand, complete and average linkage tend to yield more balanced, attractive clusters.
-For this reason, complete and average linkage are generally preferred to single linkage.
-
-### PCA and UMAP (30 pts)
-PCA
-```{r}
-
-library(FactoMineR)
-library(factoextra)
-
-# Applying PCA
-pca_res <- prcomp(t(gene_express), scale. = TRUE)
-
-# Plotting PCA results
-fviz_pca_ind(pca_res,
-             col.ind = rep(c("Healthy", "Diseased"), each = 20), # Color by group
-             legend.title = "Group",
-             title = "PCA of Gene Expression Data")
-
-```
-UMAP
-```{r}
-library(umap)
-# Preparing data for UMAP
-data_for_umap <- t(gene_express) # Transposing the data may be necessary depending on the function
-
-# Applying UMAP
-umap_res <- umap(data_for_umap)
-
-# Plotting UMAP results
-df_umap <- as.data.frame(umap_res$layout)
-df_umap$Group <- rep(c("Healthy", "Diseased"), each = 20)
-ggplot(df_umap, aes(V1, V2, color = Group)) +
-  geom_point() +
-  theme_minimal() +
-  labs(title = "UMAP of Gene Expression Data",
-       x = "UMAP 1", y = "UMAP 2", color = "Group")
-```
-
-### 12.6.13 (c) (30 pts)
-To analyze the gene expression data and identify which genes exhibit the most significant differences between two groups (healthy and diseased), we will employ the prcomp() function for Principal Component Analysis (PCA). This technique reduces the dimensionality while preserving as much of the variation as possible. By setting scale = TRUE, we ensure that each variable is not only centered to have a mean of zero but is also scaled to have a unit standard deviation. This standardization is crucial for comparing features that may have different units or scales of measurement.
-
-The output of prcomp(), specifically the rotation component, contains the loadings of the principal components. These loadings can be interpreted as the contribution or weight of each gene to the principal components. Essentially, they help in understanding how strongly each gene is associated with the different dimensions (principal components) extracted during PCA. In this context, examining the loadings can highlight the genes that differ most significantly between the healthy and diseased groups, as indicated by their contribution to the principal axes of variation within the data.
-```{r}
-pr.out <- prcomp(t(gene_express), scale = TRUE)
-head(pr.out$rotation)
-```
-
-```{r}
-
-
-gene.load <- apply(pr.out$rotation, 1, sum)
-
-gene.differ <- order(abs(gene.load), decreasing = TRUE)
-
-#the top most different genes across the two groups
-gene.differ[1:20]
-```
-
-```{r}
-# Assuming the first 20 samples are healthy and the next 20 are diseased
-healthy <- gene_express[1:20, ]
-diseased <- gene_express[21:40, ]
-
-# Applying t-test for each gene and storing p-values
-p_values <- apply(gene_express, 2, function(gene) t.test(gene[1:20], gene[21:40])$p.value)
-
-# Adjusting for multiple testing (e.g., Bonferroni correction)
-p_adjusted <- p.adjust(p_values, method = "bonferroni")
-
-# Identifying genes with significant differences
-significant_genes <- which(p_adjusted < 0.05)
-
-# Print significant genes
-print(significant_genes)
-```
-The PCA approach gives you genes that are important for the variance in the dataset but does not directly tell you about the difference between healthy and diseased samples.
-The t-test approach provides a direct answer to which genes have significantly different expressions between the two groups.
-Therefore, if your collaborator's question is specifically about which genes differ the most between healthy and diseased groups, the t-test approach provides the direct answer: genes 29, 39, and 40 have significantly different expressions between the two groups, as indicated by the adjusted p-values being below 0.05.
-```{r}
-Ch12Ex13 <- read_csv("../hw6/Ch12Ex13.csv", col_names = paste("ID", 1:40, sep = ""))
-Ch12Ex13 
-```
-
-```{r}
-library(tidyverse)
-library(tidymodels)
-library(readr)
-library(tswge)
-library(ggplot2)
-library(yardstick)
-library(workflows)
-library(parsnip)
-library(tidyclust)
-library(RcppHungarian)
-set.seed(838383)
-hc_spec <- hier_clust(
-  # num_clusters = 3,
-  linkage_method = "average"
-)
-
-
-hc_fit <- hc_spec %>%
-  fit(~ .,
-    data = as.data.frame(t(Ch12Ex13)) 
-  )
-
-hc_fit %>%
-  summary()
-```
-
-```{r}
-hc_fit$fit %>% plot()
-```
-
-
 ```{r}
 grp = factor(rep(c(1, 0), each = 20))
 
@@ -824,8 +676,8 @@ regression <- function(y) {
 }
 
 
-out <- tibble(gene = seq(1, nrow(Ch12Ex13)),
-              p_values = unlist(purrr:: map(1:nrow(Ch12Ex13), ~regression(as.matrix(Ch12Ex13)[.x, ]))))
+out <- tibble(gene = seq(1, nrow(gene_express)),
+              p_values = unlist(purrr:: map(1:nrow(gene_express), ~regression(as.matrix(gene_express)[.x, ]))))
 ```
 
 ```{r}
@@ -847,13 +699,257 @@ library(heatmaply) ## for constructing interactive heatmap
 ```{r}
 
 #create data frame for annotations
-dfh <- data.frame(sample=as.character(colnames(Ch12Ex13)), status = "disease") %>%
+dfh <- data.frame(sample=as.character(colnames(gene_express)), status = "disease") %>%
                 column_to_rownames("sample")
 dfh$status[seq(21, 40)] <-  "healthy"
 dfh
 
 
-pheatmap(Ch12Ex13[sig$gene, ], cluster_rows = FALSE, cluster_cols = T, scale="row", annotation_col = dfh,
+pheatmap(gene_express[sig$gene, ], cluster_rows = FALSE, cluster_cols = T, scale="row", annotation_col = dfh,
          annotation_colors=list(status = c(disease = "orange", healthy = "black")),
          color=colorRampPalette(c("navy", "white", "red"))(50))
 ```
+
+```{r}
+# Transpose 'gene_express' to have samples as rows and genes as columns
+gene_express_t <- t(gene_express)
+
+# Convert to data frame and add 'status' information
+gene_express_df <- as.data.frame(gene_express_t) %>%
+  mutate(status = dfh$status)
+```
+### 12.6.13 (b) (30 pts)
+There are several methods of “dissimilarity” (correlation based distance) which can be explored for creation of distance matrix.
+We now plot the hierarchical clustering dendrogram using complete, single, ward centroid and average linkage clustering using correlation based distance.
+single linkage:
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(readr)
+library(tswge)
+library(ggplot2)
+library(yardstick)
+library(workflows)
+library(parsnip)
+library(tidyclust)
+library(RcppHungarian)
+library(embed)
+library(tidytext)
+set.seed(838383)
+hc_spec_single <- hier_clust(
+   num_clusters = 2,
+  linkage_method = "single"
+)
+
+
+hc_fit_single <- hc_spec_single %>%
+  fit(~ .,
+    data = gene_express_df 
+  )
+
+hc_fit_single %>%
+  summary()
+
+hc_fit_single$fit %>% plot(main=" Single Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+average linkage:
+```{r}
+set.seed(838383)
+hc_spec_average <- hier_clust(
+   num_clusters = 2,
+  linkage_method = "average"
+)
+
+
+hc_fit_average <- hc_spec_average %>%
+  fit(~ .,
+    data = gene_express_df 
+  )
+
+hc_fit_average %>%
+  summary()
+
+hc_fit_average$fit %>% plot(main=" Average Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+complete linkage:
+```{r}
+set.seed(838383)
+hc_spec_complete <- hier_clust(
+   num_clusters = 2,
+  linkage_method = "complete"
+)
+
+
+hc_fit_complete <- hc_spec_complete %>%
+  fit(~ .,
+    data = gene_express_df
+  )
+
+hc_fit_complete %>%
+  summary()
+
+hc_fit_complete$fit %>% plot(main=" Complete Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+
+centroid linkage:
+```{r}
+set.seed(838383)
+hc_spec_centroid <- hier_clust(
+   num_clusters = 2,
+  linkage_method = "centroid"
+)
+hc_fit_centroid <- hc_spec_centroid %>%
+  fit(~ .,
+    data = gene_express_df
+  )
+
+hc_fit_centroid %>%
+  summary()
+
+hc_fit_centroid$fit %>% plot(main=" Centroid Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+ward linkage:
+```{r}
+set.seed(838383)
+hc_spec_ward <- hier_clust(
+   num_clusters = 2,
+  linkage_method = "ward.D"
+)
+hc_fit_ward<- hc_spec_ward %>%
+  fit(~ .,
+    data = gene_express_df
+  )
+
+hc_fit_ward %>%
+  summary()
+
+hc_fit_ward$fit %>% plot(main=" Ward Linkage
+with Correlation - Based Distance ", xlab="", sub ="")
+```
+
+Inference:
+Yes, the genes separate the samples into the two groups. 
+The results depend on the type of linkage used, but not too much. As we see, we obtain two clusters for average, complete and single, ward linkages except for centroid linkage.
+Typically, single linkage will tend to yield trailing clusters: very large clusters onto which individual observations attach one-by-one. On the other hand, complete ward and average linkage tend to yield more balanced, attractive clusters.
+For this reason, complete, ward and average linkage are generally preferred to single and centroid linkage.
+
+### PCA and UMAP (30 pts)
+PCA
+```{r}
+library(recipes)
+library(tidymodels)
+
+# Setup the recipe for PCA
+pca_recipe <- recipe(~ ., data = gene_express_df) %>%
+  update_role(status, new_role = "ID") %>%  # Mark 'status' as an identifier
+  step_normalize(all_predictors(), -all_outcomes()) %>%
+  step_pca(all_predictors(), -all_outcomes())
+
+# Prepare the recipe
+pca_prep <- prep(pca_recipe)
+
+# Optionally, summarize the prepared recipe
+summary(pca_prep)
+```
+
+```{r}
+library(tidytext)
+tidied_pca <- tidy(pca_prep, 2)
+
+
+tidied_pca %>%
+  filter(component %in% paste0("PC", 1:4)) %>%
+  group_by(component) %>%
+  top_n(8, abs(value)) %>%
+  ungroup() %>%
+  mutate(terms = reorder_within(terms, abs(value), component)) %>%
+  ggplot(aes(abs(value), terms, fill = value > 0)) +
+  geom_col() +
+  facet_wrap(~component, scales = "free_y") +
+  scale_y_reordered() +
+  labs(
+    x = "Absolute value of contribution",
+    y = NULL, fill = "Positive?"
+  )
+```
+
+```{r}
+juice(pca_prep) %>%
+  ggplot(aes(PC1, PC2, label = status)) +
+  geom_point(aes(color = status), alpha = 0.7, size = 2) +
+  #geom_text(check_overlap = TRUE, hjust = "inward") +
+  labs(x = "Principal Component 1", y = "Principal Component 2", title = "PCA of Gene Expression Data") +
+  theme_minimal()
+
+```
+UMAP
+```{r}
+library(embed)
+library(Matrix)
+library(irlba)
+umap_rec <- recipe(~., data = gene_express_df) %>%
+  update_role(status, new_role = "id") %>%
+  step_normalize(all_predictors()) %>%
+  step_umap(all_predictors())
+umap_prep <- prep(umap_rec)
+umap_prep
+```
+
+```{r}
+juice(umap_prep) %>%
+  ggplot(aes(UMAP1, UMAP2, label = status)) +
+  geom_point(aes(color = status), alpha = 0.7, size = 2) +
+#  geom_text(check_overlap = TRUE, hjust = "inward") +
+  labs(x = "UMAP1", y = "UMAP2", title = "umap")
+```
+
+### 12.6.13 (c) (30 pts)
+
+```{r}
+grp = factor(rep(c(1, 0), each = 20))
+
+regression <- function(y) {
+  sum <- summary(lm(y ~ grp))
+  pv <- sum$coefficients[2, 4]
+  return(pv)
+}
+
+
+out <- tibble(gene = seq(1, nrow(gene_express)),
+              p_values = unlist(purrr:: map(1:nrow(gene_express), ~regression(as.matrix(gene_express)[.x, ]))))
+```
+
+```{r}
+out %>% arrange(p_values) %>% head(10)
+
+# sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05/nrow(gene_express))
+sig <- out %>% arrange(p_values) %>% filter(p_values < 0.05 )
+```
+In conclusion, 502, 589, 600,590, 565, 551, 593, 584, 538, 569 are the genes that are significantly different between the two groups (healthy and diseased) as indicated by the adjusted p-values being below 0.05.
+```{r}
+# install.packages("pheatmap")
+library(pheatmap)
+# install.packages("ggplotify")
+library(ggplotify) ## to convert pheatmap to ggplot2
+# install.packages("heatmaply")
+library(heatmaply) ## for constructing interactive heatmap
+```
+
+```{r}
+
+#create data frame for annotations
+dfh <- data.frame(sample=as.character(colnames(gene_express)), status = "disease") %>%
+                column_to_rownames("sample")
+dfh$status[seq(21, 40)] <-  "healthy"
+dfh
+
+
+pheatmap(gene_express[sig$gene, ], cluster_rows = FALSE, cluster_cols = T, scale="row", annotation_col = dfh,
+         annotation_colors=list(status = c(disease = "orange", healthy = "black")),
+         color=colorRampPalette(c("navy", "white", "red"))(50))
+```
+
