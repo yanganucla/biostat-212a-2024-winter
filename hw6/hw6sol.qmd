@@ -166,6 +166,7 @@ NYSE_other <- NYSE %>%
   select(-train) %>%
   drop_na()
 dim(NYSE_other)
+NYSE_other
 ```
 
 ```{r}
@@ -214,17 +215,6 @@ NYSE %>%
   geom_smooth(method = "lm")
 ```
 
-
-```{r}
-wrong_split <- initial_split(NYSE_other)
-
-bind_rows(
-  training(wrong_split) %>% mutate(type = "train"),
-  testing(wrong_split) %>% mutate(type = "test")
-) %>% 
-  ggplot(aes(x = date, y = log_volume, color = type, group = NA)) + 
-  geom_line()
-```
 ```{r}
 correct_split <- initial_time_split(NYSE_other %>% arrange(date))
 
@@ -274,7 +264,7 @@ sliding_period(NYSE_other %>% arrange(date),
 
 ```{r}
 en_receipe <- 
-  recipe(log_volume ~ ., data = NYSE_other) %>% 
+  recipe(log_volume ~ log_volume_lag1 + DJ_return_lag1 + log_volatility_lag1 + log_volume_lag2 + DJ_return_lag2 + log_volatility_lag2 + log_volume_lag3 + DJ_return_lag3 + log_volatility_lag3 + log_volume_lag4 + DJ_return_lag4 + log_volatility_lag4 + log_volume_lag5 + DJ_return_lag5 + log_volatility_lag5 + date, data = NYSE_other) %>% 
   step_dummy(all_nominal(), -all_outcomes()) %>% 
   step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
   step_naomit(all_predictors()) %>%
@@ -283,7 +273,7 @@ en_receipe
 ```
 
 ### Model training
-
+###AR(5) with elastic net (lasso + ridge) regularization
 ```{r}
 ### Model
 enet_mod <- 
@@ -389,7 +379,7 @@ predictions
 - Hint: [Workflow: Random Forest for Prediction](https://ucla-biostat-212a.github.io/2024winter/slides/08-tree/workflow_rf_reg.html) is a good starting point.
 
 ```{r}
-rf_recipe <- recipe(log_volume ~ ., data = NYSE_other) %>% 
+rf_recipe <- recipe(log_volume ~ log_volume_lag1 + DJ_return_lag1 + log_volatility_lag1 + log_volume_lag2 + DJ_return_lag2 + log_volatility_lag2 + log_volume_lag3 + DJ_return_lag3 + log_volatility_lag3 + log_volume_lag4 + DJ_return_lag4 + log_volatility_lag4 + log_volume_lag5 + DJ_return_lag5 + log_volatility_lag5 + date, data = NYSE_other) %>% 
   step_dummy(all_nominal(), -all_outcomes()) %>% 
   step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
   step_naomit(all_predictors()) %>%
@@ -507,7 +497,7 @@ final_fit_rf %>%
 
 
 ```{r}
-boost_recipe <- recipe(log_volume ~ ., data = NYSE_other) %>% 
+boost_recipe <- recipe(log_volume ~ log_volume_lag1 + DJ_return_lag1 + log_volatility_lag1 + log_volume_lag2 + DJ_return_lag2 + log_volatility_lag2 + log_volume_lag3 + DJ_return_lag3 + log_volatility_lag3 + log_volume_lag4 + DJ_return_lag4 + log_volatility_lag4 + log_volume_lag5 + DJ_return_lag5 + log_volatility_lag5 + date, data = NYSE_other) %>% 
   step_dummy(all_nominal(), -all_outcomes()) %>% 
   step_normalize(all_numeric_predictors(), -all_outcomes()) %>%  
   step_naomit(all_predictors()) %>%
@@ -627,19 +617,20 @@ The summary of the performance of various machine learning forecasters on predic
 | Method | CV $R^2$ | Test $R^2$ |
 |:------:|:------:|:------:|:------:|
 | Baseline | - |Straw man test R2: 0.35 |
-| AR(5) | 0.38 | 0.69 |
-| Random Forest | 0.34| 0.65| 
-| Boosting | 0.37| 0.67| 
-Baseline (Straw man): The baseline model, which uses the previous day's log trading volume as the prediction for the current day, achieved a R^2 of 0.35 on the test set. This simple model serves as a point of comparison for more complex models. 
+| AR(5) | 0.250 | 0.599 |
+| Random Forest | 0.253| 0.583| 
+| Boosting | 0.256| 0.595| 
+Here's a summary of the test performance based on the $R^2$ values provided:
+Baseline (Straw Man Test): The baseline method, referred to as "Straw man test," has an $R^2$ of 0.35 on the test set. This gives us a basic level of performance against which to compare the other methods. The baseline method doesn't have a reported CV $R^2$ value.
+AR(5) (Autoregressive Model with Lag 5): This model has a CV $R^2$ of 0.250 and a test $R^2$ of 0.599. It significantly outperforms the baseline on the test dataset, indicating it can explain a greater proportion of the variance.
+Random Forest: This method shows a CV $R^2$ of 0.253 and a test $R^2$ of 0.583. It's a competitive model that also outperforms the baseline, though it slightly lags behind the AR(5) model on the test dataset.
+Boosting: The boosting model has a CV $R^2$ of 0.256 and a test $R^2$ of 0.595. It's very close to the AR(5) model in terms of performance on the test dataset and represents a slight improvement over the Random Forest model.
+In evaluating these results:
+Cross-Validation Performance: The cross-validation $R^2$ values are relatively close for the AR(5), Random Forest, and Boosting methods, suggesting that they have similar predictive capabilities based on the training data. Boosting shows a marginally higher CV $R^2$, suggesting it might generalize slightly better than the others.
+Test Performance: On the unseen test data, the AR(5) model has the highest $R^2$ value (0.599), closely followed by Boosting (0.595), and then Random Forest (0.583). These differences are not substantial but indicate that, in this specific case, the AR(5) and Boosting models are slightly more effective at predicting the dependent variable.
+Overall, while all three advanced methods (AR(5), Random Forest, and Boosting) demonstrate a significant improvement over the baseline, the AR(5) and Boosting models show the best performance on the test dataset. The choice between them might depend on additional considerations like model complexity, interpretability, and computational resources.
 
-AR(5): An autoregressive model of order 5 (AR(5)), which uses the past 5 days of log trading volume to predict the current day's volume, showed an improvement over the baseline, with a CV R^2 of 0.38 and a test R^2 of 0.69. This indicates that incorporating more historical data points helps in improving the prediction accuracy.
 
-Random Forest: The Random Forest model, which is a non-linear and more complex model compared to AR(5), achieved a slightly lower CV R^2 of 0.34 but also a lower test R^2 of 0.65. This suggests that despite its ability to capture complex patterns in the data, it might be overfitting to the training data or not capturing the time series dynamics as effectively as linear models in this specific case.
-
-Boosting: The Boosting model, another sophisticated and flexible ensemble method, showed a CV R^2 of 0.37 and a test R^2 of 0.67. It performed better than the Random Forest model but was still slightly behind the AR(5) model in terms of test performance. Boosting's iterative approach to correcting errors might be beneficial for this time series forecasting task, although it didn't outperform the simpler AR(5) model.
-
-Conclusion:
-The AR(5) model, despite its simplicity, provided the best performance on the test data among the models evaluated. This suggests that for the task of forecasting daily Log trading volume, a linear approach that directly incorporates recent historical values can be very effective. Meanwhile, the more complex Random Forest and Boosting models did not achieve higher performance, highlighting the importance of model selection and the possibility that simpler models may suffice for certain forecasting tasks.
 ### Extension reading   
 - [MOIRAI: Salesforce’s Foundation Model for Time-Series Forecasting](https://towardsdatascience.com/moirai-salesforces-foundation-model-for-time-series-forecasting-4eff6c34093d)
 
